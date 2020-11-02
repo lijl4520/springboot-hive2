@@ -1,31 +1,42 @@
 package com.embraces.hive.config;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.sql.SQLException;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.ResourceBundle;
 
 import javax.sql.DataSource;
 
+import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * 数据源配置
- * <br>因为Hconnection不支持setReadOnly方法，所以不能使用bonecp作为数据源连接池
- * @author	tokings.tang@embracesource.com
- * @date	2018年3月6日 下午3:47:35
- * @copyright	http://www.embracesource.com
+ * @Author Lijl
+ * @ClassName DataSourceConfig
+ * @Description 数据源配置
+ * @Date 2020/10/20 15:09
+ * @Version 1.0
  */
 @Configuration
 public class DataSourceConfig {
 	
 	private Logger log = LoggerFactory.getLogger(DataSourceConfig.class);
+
+	@Value("${hive.datasource.hive.url}")
+	public String url;
+	@Value("${separator}")
+	public String separator;
+	@Value("${authSrvUrl}")
+	public String authSrvUrl;
 
 	/**
 	 * 认证类型
@@ -51,19 +62,29 @@ public class DataSourceConfig {
 	@Value("${authentication.kerberos.keytab}")
 	private String keytab;
 
-	@Bean
-	@ConfigurationProperties(prefix="bonecp", ignoreInvalidFields=true, ignoreUnknownFields=true)
-	public DataSource dataSource() {
-		// 初始化数据源之前先做用户认证
-		authentication();
-		
-		DataSource dataSource = DataSourceBuilder.create().build();
 
-		log.info("init new dataSource: {}", dataSource);
-		
-		return dataSource;
+	@Bean
+	public DataSource dataSource() {
+		loadProps();
+		//用户认证
+		//authentication();
+		return new DruidDataSource();
 	}
-	
+
+	private void loadProps() {
+		log.info("开始加载properties配置文件");
+		ResourceBundle resourceBundle = ResourceBundle.getBundle("servicebean");
+		Enumeration<String> keys = resourceBundle.getKeys();
+		while (keys.hasMoreElements()) {
+			String key = keys.nextElement();
+			String val = resourceBundle.getString(key);
+			log.info("读取BeanId,API标识:{}对应的业务BeanId:{}",key,val);
+			TvServiceBaseFactory.serviceCode.put(key,val);
+		}
+		log.info("加载properties配置文件加载完毕");
+	}
+
+
 	/**
 	 * 认证
 	 */
@@ -77,17 +98,18 @@ public class DataSourceConfig {
 		}
 		
 		if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
+			System.out.println(krb5FilePath);
 			// 默认：这里不设置的话，win默认会到 C盘下读取krb5.init
-			System.setProperty("java.security.krb5.conf", krb5FilePath);
+			log.info("krb5文件路径{}",krb5FilePath);
 		} else {
+			log.info("krb5文件路径{}",krb5FilePath);
 			// linux 会默认到 /etc/krb5.conf
-			// 中读取krb5.conf,本文笔者已将该文件放到/etc/目录下，因而这里便不用再设置了
 			System.setProperty("java.security.krb5.conf", krb5FilePath); 
 		}
 
 		// 使用Hadoop安全登录
 		org.apache.hadoop.conf.Configuration conf = new org.apache.hadoop.conf.Configuration();
-		 conf.set("hadoop.security.authentication", authenticationType);
+		conf.set("hadoop.security.authentication", authenticationType);
 		try {
 			UserGroupInformation.setConfiguration(conf);
 			UserGroupInformation.loginUserFromKeytab(principal, keytab);
@@ -96,10 +118,4 @@ public class DataSourceConfig {
 			log.error(e1.getMessage() + ", detail:{}", e1);
 		}
 	}
-
-	@Bean(name = "jdbcTemplate")
-	public JdbcTemplate jdbcTemplate(@Qualifier("dataSource") DataSource dataSource) {
-		return new JdbcTemplate(dataSource, true);
-	}
-
 }

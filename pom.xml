@@ -17,8 +17,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
-		<hadoop.version>2.7.3.2.6.0.3-8</hadoop.version>
-		<hive.version>1.2.1000.2.6.0.3-8</hive.version>
+		<hadoop.version>3.1.0</hadoop.version>
+		<hive.version>3.1.0</hive.version>
 	</properties>
 	<!-- Add typical dependencies for a web application -->
 	<dependencies>
@@ -30,6 +30,10 @@
 			<systemPath>${JAVA_HOME}/lib/tools.jar</systemPath>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct-jdk8</artifactId>
 			<version>${org.mapstruct.version}</version>
@@ -39,45 +43,16 @@
 			<groupId>commons-pool</groupId>
 			<artifactId>commons-pool</artifactId>
 		</dependency>
+
 		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger2</artifactId>
-			<version>2.2.2</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.mapstruct</groupId>
-					<artifactId>mapstruct</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>1.2.46</version>
 		</dependency>
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger-ui</artifactId>
-			<version>2.2.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.mybatis.spring.boot</groupId>
-			<artifactId>mybatis-spring-boot-starter</artifactId>
-			<version>1.2.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>ch.qos.logback</groupId>
-					<artifactId>logback-classic</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-xml</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.jolbox</groupId>
-			<artifactId>bonecp</artifactId>
-			<version>0.8.0.RELEASE</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-pool</groupId>
-			<artifactId>commons-pool</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
@@ -96,39 +71,43 @@
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>commons-pool</groupId>
-			<artifactId>commons-pool</artifactId>
-		</dependency>
+
 		<dependency>
 			<groupId>commons-dbcp</groupId>
 			<artifactId>commons-dbcp</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.1</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.freemarker</groupId>
 			<artifactId>freemarker</artifactId>
 		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/co.cask.tephra/tephra-core -->
 		<dependency>
 			<groupId>co.cask.tephra</groupId>
@@ -149,8 +128,13 @@
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
 		</dependency>
-
 		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch</artifactId>
+			<version>0.1.55</version>
+		</dependency>
+
+		<!--<dependency>
 			<groupId>org.apache.hive</groupId>
 			<artifactId>hive-jdbc</artifactId>
 			<version>${hive.version}</version>
@@ -160,101 +144,470 @@
 					<artifactId>jetty-all</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>-->
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-accumulo-handler</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-accumulo-handler-3.1.0-bc3.0.1.jar</systemPath>
 		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-beeline</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-beeline-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-classification</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-classification-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-cli</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-cli-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-common</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-common-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-contrib</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-contrib-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-druid-handler</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-druid-handler-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-exec</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-exec-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-hbase-handler</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-hbase-handler-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-hcatalog-core</artifactId>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-hcatalog-core.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-hcatalog-core</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-hcatalog-core-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-hcatalog-server-extensions</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-hcatalog-server-extensions-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-hplsql</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-hplsql-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-jdbc</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-jdbc-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-jdbc-handler</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-jdbc-handler-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-kryo-registrator</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-kryo-registrator-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-llap-client</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-llap-client-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-llap-common</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-llap-common-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-llap-common</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-llap-common-3.1.0-bc3.0.1-tests.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-llap-ext-client</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-llap-ext-client-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-llap-server</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-llap-server-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-llap-tez</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-llap-tez-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-metastore</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-metastore-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-serde</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-serde-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-service</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-service-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-service-rpc</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-service-rpc-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-shims</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-shims-0.23-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-shims</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-shims-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-shims-common</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-shims-common-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-shims-scheduler</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-shims-scheduler-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-standalone-metastore</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-standalone-metastore-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-storage-api</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-storage-api-2.7.0.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-streaming</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-streaming-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-testutils</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-testutils-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-upgrade-acid</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-upgrade-acid-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-vector-code-gen</artifactId>
+			<version>3.1.0-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hive-vector-code-gen-3.1.0-bc3.0.1.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.zookeeper</groupId>
+			<artifactId>zookeeper</artifactId>
+			<version>3.5.2-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/zookeeper-3.5.2-bc3.0.1.jar</systemPath>
+		</dependency>
+
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-client</artifactId>
 			<version>${hadoop.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>druid-spring-boot-starter</artifactId>
+			<version>1.1.10</version>
+		</dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--<dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.11</version>
+        </dependency>-->
 	</dependencies>
 
 	<!-- Package as an executable jar -->
 	<build>
+		<finalName>indu-hive2-api</finalName>
 		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.bsc.maven</groupId>
-				<artifactId>maven-processor-plugin</artifactId>
-				<version>2.2.4</version>
-				<configuration>
-					<defaultOutputDirectory>
-						${project.build.directory}/generated-sources
-					</defaultOutputDirectory>
-					<processors>
-						<processor>org.mapstruct.ap.MappingProcessor</processor>
-					</processors>
-					<options>
-						<mapstruct.suppressGeneratorTimestamp>true</mapstruct.suppressGeneratorTimestamp>
-						<mapstruct.defaultComponentModel>spring</mapstruct.defaultComponentModel>
-					</options>
-				</configuration>
-				<executions>
-					<execution>
-						<id>process</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>process</goal>
-						</goals>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>org.mapstruct</groupId>
-						<artifactId>mapstruct-processor</artifactId>
-						<version>${org.mapstruct.version}</version>
-					</dependency>
-				</dependencies>
-			</plugin>
+			<!-- 打JAR包 -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<configuration>
+						<!-- 不打包资源文件（配置文件和依赖包分开） -->
+						<excludes>
+							<exclude>*.**</exclude>
+							<exclude>*/*.xml</exclude>
+						</excludes>
+						<archive>
+							<manifest>
+								<addClasspath>true</addClasspath>
+								<!-- MANIFEST.MF 中 Class-Path 加入前缀 -->
+								<classpathPrefix>lib/</classpathPrefix>
+								<!-- jar包不包含唯一版本标识 -->
+								<useUniqueVersions>false</useUniqueVersions>
+								<!--指定入口类 -->
+								<mainClass>com.embraces.hive.HiveMain</mainClass>
+							</manifest>
+							<manifestEntries>
+								<!--MANIFEST.MF 中 Class-Path 加入资源文件目录 -->
+								<Class-Path>./resources/ lib/hive-accumulo-handler-3.1.0-bc3.0.1.jar lib/hive-beeline-3.1.0-bc3.0.1.jar lib/hive-classification-3.1.0-bc3.0.1.jar lib/hive-cli-3.1.0-bc3.0.1.jar lib/hive-common-3.1.0-bc3.0.1.jar lib/hive-contrib-3.1.0-bc3.0.1.jar lib/hive-druid-handler-3.1.0-bc3.0.1.jar lib/hive-exec-3.1.0-bc3.0.1.jar lib/hive-hbase-handler-3.1.0-bc3.0.1.jar lib/hive-hcatalog-core.jar lib/hive-hcatalog-core-3.1.0-bc3.0.1.jar lib/hive-hcatalog-server-extensions-3.1.0-bc3.0.1.jar lib/hive-hplsql-3.1.0-bc3.0.1.jar lib/hive-jdbc-3.1.0-bc3.0.1.jar lib/hive-jdbc-handler-3.1.0-bc3.0.1.jar lib/hive-kryo-registrator-3.1.0-bc3.0.1.jar lib/hive-llap-client-3.1.0-bc3.0.1.jar lib/hive-llap-common-3.1.0-bc3.0.1.jar lib/hive-llap-common-3.1.0-bc3.0.1-tests.jar lib/hive-llap-ext-client-3.1.0-bc3.0.1.jar lib/hive-llap-server-3.1.0-bc3.0.1.jar lib/hive-llap-tez-3.1.0-bc3.0.1.jar lib/hive-metastore-3.1.0-bc3.0.1.jar lib/hive-serde-3.1.0-bc3.0.1.jar lib/hive-service-3.1.0-bc3.0.1.jar lib/hive-service-rpc-3.1.0-bc3.0.1.jar lib/hive-shims-0.23-3.1.0-bc3.0.1.jar lib/hive-shims-3.1.0-bc3.0.1.jar lib/hive-shims-common-3.1.0-bc3.0.1.jar lib/hive-shims-scheduler-3.1.0-bc3.0.1.jar lib/hive-standalone-metastore-3.1.0-bc3.0.1.jar lib/hive-storage-api-2.7.0.jar lib/hive-streaming-3.1.0-bc3.0.1.jar lib/hive-testutils-3.1.0-bc3.0.1.jar lib/hive-upgrade-acid-3.1.0-bc3.0.1.jar lib/hive-vector-code-gen-3.1.0-bc3.0.1.jar lib/zookeeper-3.5.2-bc3.0.1.jar</Class-Path>
+							</manifestEntries>
+						</archive>
+						<outputDirectory>${project.build.directory}</outputDirectory>
+					</configuration>
+				</plugin>
+
+				<!-- 该插件的作用是用于复制依赖的jar包到指定的文件夹里 -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<executions>
+						<execution>
+							<id>copy-dependencies</id>
+							<phase>package</phase>
+							<goals>
+								<goal>copy-dependencies</goal>
+							</goals>
+							<configuration>
+								<outputDirectory>${project.build.directory}/lib/</outputDirectory>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+
+				<!-- 该插件的作用是用于复制指定的文件 -->
+				<plugin>
+					<artifactId>maven-resources-plugin</artifactId>
+					<executions>
+						<execution> <!-- 复制配置文件 -->
+							<id>copy-resources</id>
+							<phase>package</phase>
+							<goals>
+								<goal>copy-resources</goal>
+							</goals>
+							<configuration>
+								<resources>
+									<resource>
+										<directory>src/main/resources</directory>
+										<includes>
+											<!-- <include>*.properties</include> -->
+										</includes>
+									</resource>
+								</resources>
+								<outputDirectory>${project.build.directory}/resources</outputDirectory>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+
+				<!-- SpringBoot 打包插件，把 maven-jar-plugin 打成的jar包重新打成可运行jar包 -->
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+					<configuration>
+						<!--重写包含依赖，包含不存在的依赖，jar里没有pom里的依赖 -->
+						<includes>
+							<include>
+								<groupId>null</groupId>
+								<artifactId>null</artifactId>
+							</include>
+						</includes>
+						<layout>ZIP</layout>
+						<!--使用外部配置文件，jar包里没有资源文件 -->
+						<addResources>true</addResources>
+						<outputDirectory>${project.build.directory}/resources</outputDirectory>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>repackage</goal>
+							</goals>
+							<configuration>
+								<!--配置jar包特殊标识 配置后，保留原文件，生成新文件 *-run.jar -->
+								<!--配置jar包特殊标识 不配置，原文件命名为 *.jar.original，生成新文件 *.jar -->
+								<!--<classifier>run</classifier> -->
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
 		</plugins>
 	</build>
-	<!-- Add Spring repositories -->
-	<!-- (you don't need this if you are using a .RELEASE version) -->
-	<repositories>
-		<repository>
-			<id>spring-snapshots</id>
-			<url>http://repo.spring.io/snapshot</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>spring-milestones</id>
-			<url>http://repo.spring.io/milestone</url>
-		</repository>
-		<repository>
-			<id>maven-central</id>
-			<url>http://central.maven.org/maven2</url>
-		</repository>
-		<repository>
-			<id>hwx-releases</id>
-			<url>http://repo.hortonworks.com/content/repositories/releases/</url>
-		</repository>
-		<repository>
-			<id>hwx-public</id>
-			<url>http://repo.hortonworks.com/content/groups/public/</url>
-		</repository>
-	</repositories>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>spring-snapshots</id>
-			<url>http://repo.spring.io/snapshot</url>
-		</pluginRepository>
-		<pluginRepository>
-			<id>spring-milestones</id>
-			<url>http://repo.spring.io/milestone</url>
-		</pluginRepository>
-	</pluginRepositories>
 </project>
 
