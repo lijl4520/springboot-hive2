@@ -1,7 +1,7 @@
 #编译运行
 
 ##说明
-此工程采用SpringBoot使用JDBC集成hive。
+此工程采用SpringBoot + JDBC集成hive。
 
 在工程目录下，执行如下命令：
 `mvn clean package -DskipTests`
