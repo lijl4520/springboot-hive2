@@ -24,18 +24,16 @@ public class TvDimServiceImpl extends AbstractTvTemplate {
      * @Description 维表
      * @Date 11:34 2020/10/28
      * @Version 1.0
-     * @param conStrArr
+     * @param conStr
      * @param hiveTableEnum
      * @param jdbcUrl
      * @return: java.lang.String
     **/
     @Override
-    protected String executes(String[] conStrArr, HiveTableEnum hiveTableEnum,String jdbcUrl,String separator) throws Exception {
+    protected String executes(String conStr, HiveTableEnum hiveTableEnum,String jdbcUrl,String separator) throws Exception {
         JdbcUtils jdbcUtils = new JdbcUtils();
         StringBuilder sb = new StringBuilder("SELECT poi_cls_code,poi_cls_name,poi_cls1_code,poi_cls2_code,poi_cls3_code,poi_cls4_code,poi_cls5_code,poi_cls1,poi_cls2,poi_cls3,poi_cls4,poi_cls5 FROM "+hiveTableEnum+" WHERE 1 = 1");
-        for (String con : conStrArr) {
-            sb.append(" AND "+con);
-        }
+        sb.append(conStr);
         List<TDimMd> list1 = jdbcUtils.executeQueryList(jdbcUrl, "", "", sb.toString(), TDimMd.class, null);
 
         StringBuilder stringBuilder = new StringBuilder("poi_cls_code"+separator+"poi_cls_name"+separator+"poi_cls1_code"+separator+"poi_cls2_code"+separator+"poi_cls3_code"+separator+"poi_cls4_code"+separator+"poi_cls5_code"+separator+"poi_cls1"+separator+"poi_cls2"+separator+"poi_cls3"+separator+"poi_cls4"+separator+"poi_cls5\r\n");

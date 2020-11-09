@@ -24,18 +24,16 @@ public class TvDAppServiceImpl extends AbstractTvTemplate {
      * @Description APP事件（日）
      * @Date 11:33 2020/10/28
      * @Version 1.0
-     * @param conStrArr
+     * @param conStr
      * @param hiveTableEnum
      * @param jdbcUrl
      * @return: java.lang.String
     **/
     @Override
-    protected String executes(String[] conStrArr, HiveTableEnum hiveTableEnum, String jdbcUrl,String separator) throws Exception {
+    protected String executes(String conStr, HiveTableEnum hiveTableEnum, String jdbcUrl,String separator) throws Exception {
         JdbcUtils jdbcUtils = new JdbcUtils();
         StringBuilder sb = new StringBuilder("SELECT SERV_NUMBER,IMEI FROM "+hiveTableEnum+" WHERE 1=1");
-        for (String con : conStrArr) {
-            sb.append(" AND "+con);
-        }
+        sb.append(conStr);
         List<TvDSumSkInduApp> list1 = jdbcUtils.executeQueryList(jdbcUrl, "", "", sb.toString(), TvDSumSkInduApp.class, null);
         StringBuilder stringBuilder = new StringBuilder("SERV_NUMBER"+separator+"IMEI\r\n");
         if (list1!=null&&list1.size()>0){

@@ -67,7 +67,7 @@ public class DataSourceConfig {
 	public DataSource dataSource() {
 		loadProps();
 		//用户认证
-		//authentication();
+		authentication();
 		return new DruidDataSource();
 	}
 

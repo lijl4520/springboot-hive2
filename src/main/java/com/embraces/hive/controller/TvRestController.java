@@ -1,8 +1,12 @@
 package com.embraces.hive.controller;
 
+import com.alibaba.fastjson.JSONArray;
 import com.embraces.hive.config.TvServiceBaseFactory;
 import com.embraces.hive.util.BaseResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Author Lijl
@@ -22,14 +26,14 @@ public class TvRestController {
      * @Date 9:26 2020/10/29
      * @Version 1.0
      * @param methodNameType
-     * @param condition
+     * @param jsonArray
      * @return: com.embraces.hive.util.BaseResult<?>
     **/
-    @PostMapping(value = "/{methodNameType}/{condition}")
-    public BaseResult<?> induMethod(@PathVariable String methodNameType,@PathVariable String condition){
+    @PostMapping(value = "/{methodNameType}")
+    public BaseResult<?> induMethod(@PathVariable String methodNameType,@RequestBody JSONArray jsonArray){
         try {
-            if (condition!=null && !"".equals(condition)){
-                return TvServiceBaseFactory.handle(methodNameType, condition);
+            if (jsonArray!=null){
+                return TvServiceBaseFactory.handle(methodNameType, jsonArray);
             }else {
                 return new BaseResult<>(500,"参数异常",null);
             }

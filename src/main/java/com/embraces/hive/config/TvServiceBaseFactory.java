@@ -1,5 +1,6 @@
 package com.embraces.hive.config;
 
+import com.alibaba.fastjson.JSONArray;
 import com.embraces.hive.annotation.ServiceCode;
 import com.embraces.hive.service.TvService;
 import com.embraces.hive.util.BaseResult;
@@ -70,7 +71,7 @@ public class TvServiceBaseFactory {
      * @param condition
      * @return: com.embraces.hive.util.BaseResult<?>
     **/
-    public static BaseResult<?> handle(String methodNameType,String condition){
+    public static BaseResult<?> handle(String methodNameType, JSONArray condition){
         return getTvService(methodNameType).deal(condition,methodNameType);
     }
 

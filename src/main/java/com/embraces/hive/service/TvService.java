@@ -1,5 +1,6 @@
 package com.embraces.hive.service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.embraces.hive.util.BaseResult;
 
 /**
@@ -11,7 +12,7 @@ import com.embraces.hive.util.BaseResult;
  */
 public interface TvService {
 
-    BaseResult<?> deal(String condition, String methodNameType);
+    BaseResult<?> deal(JSONArray condition, String methodNameType);
 
 /*    String getCode();*/
 }

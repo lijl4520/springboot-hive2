@@ -1,5 +1,7 @@
 package com.embraces.hive.template;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.embraces.hive.config.CsvFilePath;
 import com.embraces.hive.config.DataSourceConfig;
 import com.embraces.hive.convert.Decnew;
@@ -41,13 +43,13 @@ public abstract class AbstractTvTemplate implements TvService {
      * @Description 查询具体数据
      * @Date 11:31 2020/10/28
      * @Version 1.0
-     * @param conStrArr
+     * @param conStr
      * @param hiveTableEnum
      * @param jdbcUrl
      * @exception throw Exception
      * @return: java.lang.String
     **/
-    protected abstract String executes(String[] conStrArr,HiveTableEnum hiveTableEnum,String jdbcUrl,String separator) throws Exception;
+    protected abstract String executes(String conStr,HiveTableEnum hiveTableEnum,String jdbcUrl,String separator) throws Exception;
 
     /**
      * @Author Lijl
@@ -78,33 +80,36 @@ public abstract class AbstractTvTemplate implements TvService {
      * @return: com.embraces.hive.util.BaseResult<?>
     **/
     @Override
-    public BaseResult<?> deal(String condition, String methodNameType) {
+    public BaseResult<?> deal(JSONArray condition, String methodNameType) {
         String repCode = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
         HiveTableEnum hiveTableEnum = HiveTableEnum.fromTypeName(methodNameType);
-        String[] conStrArr = condition.split("&");
         boolean checkParBol = false;
         log.info("开始校验接口[{}]参数",methodNameType);
+        StringBuilder sb = new StringBuilder();
         if ("T_DIM_MD_INDUSTRY_CONT_CODE".equals(hiveTableEnum.name())){
             List<String> parList = new ArrayList<>();
             parList.add("time_id");
-            checkParBol = checkParameter(conStrArr,parList);
+            checkParBol = checkParameter(condition,parList, sb);
         }else{
-            checkParBol = checkParameter(conStrArr,null);
+            checkParBol = checkParameter(condition,null, sb);
         }
         log.info("校验接口[{}]结果：{}",methodNameType,checkParBol);
         if (checkParBol){
-            return deal(repCode,hiveTableEnum,conStrArr,methodNameType);
+            if (sb!=null){
+                return deal(repCode,hiveTableEnum,sb.toString(),methodNameType);
+            }
+            return new BaseResult<>(400,"查询条件缺失",repCode);
         }
         return new BaseResult<>(400,"参数缺失",repCode);
     }
 
 
-    private BaseResult<?> deal(String repCode,HiveTableEnum hiveTableEnum,String[] conStrArr,String methodNameType){
+    private BaseResult<?> deal(String repCode,HiveTableEnum hiveTableEnum,String conStr,String methodNameType){
         SFTPUtils sftpUtils = null;
         String msg = "成功";
         int code = 200;
         try {
-            String restStr = this.executes(conStrArr,hiveTableEnum,dataSourceConfig.url,"100".equals(dataSourceConfig.separator)?"Ж":dataSourceConfig.separator);
+            String restStr = this.executes(conStr,hiveTableEnum,dataSourceConfig.url,"100".equals(dataSourceConfig.separator)?"Ж":dataSourceConfig.separator);
             String dateStr = getDateStr();
             String fileName = methodNameType+"_"+dateStr+"_"+repCode+".txt";
             String filepath = csvFilePath.locaCsvPath+fileName;
@@ -139,20 +144,34 @@ public abstract class AbstractTvTemplate implements TvService {
      * @param list
      * @return: boolean
     **/
-    private boolean checkParameter(String[] conStrArr,List<String> list){
+    private boolean checkParameter(JSONArray conStrArr,List<String> list,StringBuilder sb){
         List<String> dataSourList = new ArrayList<>();
         dataSourList.add("TIME_ID");
         dataSourList.add("HOME_PROV_ID");
         dataSourList.add("POI_CLS_CODE");
         List<String> paraList = new ArrayList<>();
-        for (String con : conStrArr) {
-            try {
-                String p = con.substring(0, con.indexOf("="));
-                paraList.add(p);
-            }catch (Exception e){
-                log.info("过滤非校验条件");
+        conStrArr.forEach(o -> {
+            JSONObject jsonObject = (JSONObject) JSONObject.toJSON(o);
+            String key = jsonObject.getString("key");
+            String operator = jsonObject.getString("operator");
+            Object value = jsonObject.get("value");
+            boolean flBol = false;
+            if (key!=null&&!"".equals(key) && operator!=null && !"".equals(operator) && value!=null){
+                flBol = true;
             }
-        }
+            if (flBol){
+                paraList.add(key);
+                if (!"between".equals(operator)){
+                    if (value instanceof String){
+                        sb.append(" AND "+key+operator+"\""+value+"\"");
+                    }else {
+                        sb.append(" AND "+key+operator+value);
+                    }
+                }else{
+                    sb.append(" AND "+key+">"+value+" AND "+value+">"+key);
+                }
+            }
+        });
         if (list!=null){
             return paraList.containsAll(list);
         }
