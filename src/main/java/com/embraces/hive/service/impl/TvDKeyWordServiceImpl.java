@@ -32,10 +32,10 @@ public class TvDKeyWordServiceImpl extends AbstractTvTemplate {
     @Override
     protected String executes(String conStr, HiveTableEnum hiveTableEnum, String jdbcUrl, String separator) throws Exception {
         JdbcUtils jdbcUtils = new JdbcUtils();
-        StringBuilder sb = new StringBuilder("SELECT SERV_NUMBER,IMEI FROM "+hiveTableEnum+" WHERE 1=1");
+        StringBuffer sb = new StringBuffer("SELECT SERV_NUMBER,IMEI FROM "+hiveTableEnum+" WHERE 1=1");
         sb.append(conStr);
         List<TvDSumSkInduKeyWord> list1 = jdbcUtils.executeQueryList(jdbcUrl, "", "", sb.toString(), TvDSumSkInduKeyWord.class, null);
-        StringBuilder stringBuilder = new StringBuilder("SERV_NUMBER"+separator+"IMEI\r\n");
+        StringBuffer stringBuilder = new StringBuffer("SERV_NUMBER"+separator+"IMEI\r\n");
         if (list1!=null&&list1.size()>0){
             list1.forEach(td -> {
                 String serv_number = td.getSERV_NUMBER();

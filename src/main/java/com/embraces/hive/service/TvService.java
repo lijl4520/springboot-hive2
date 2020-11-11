@@ -3,6 +3,9 @@ package com.embraces.hive.service;
 import com.alibaba.fastjson.JSONArray;
 import com.embraces.hive.util.BaseResult;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+
 /**
  * @Author Lijl
  * @InterfaceName TvService
@@ -12,7 +15,5 @@ import com.embraces.hive.util.BaseResult;
  */
 public interface TvService {
 
-    BaseResult<?> deal(JSONArray condition, String methodNameType);
-
-/*    String getCode();*/
+    BaseResult<?> deal(JSONArray condition, String methodNameType, HttpServletResponse response) throws UnsupportedEncodingException;
 }

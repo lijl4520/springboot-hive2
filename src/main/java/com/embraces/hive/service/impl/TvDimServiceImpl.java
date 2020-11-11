@@ -32,11 +32,11 @@ public class TvDimServiceImpl extends AbstractTvTemplate {
     @Override
     protected String executes(String conStr, HiveTableEnum hiveTableEnum,String jdbcUrl,String separator) throws Exception {
         JdbcUtils jdbcUtils = new JdbcUtils();
-        StringBuilder sb = new StringBuilder("SELECT poi_cls_code,poi_cls_name,poi_cls1_code,poi_cls2_code,poi_cls3_code,poi_cls4_code,poi_cls5_code,poi_cls1,poi_cls2,poi_cls3,poi_cls4,poi_cls5 FROM "+hiveTableEnum+" WHERE 1 = 1");
+        StringBuffer sb = new StringBuffer("SELECT poi_cls_code,poi_cls_name,poi_cls1_code,poi_cls2_code,poi_cls3_code,poi_cls4_code,poi_cls5_code,poi_cls1,poi_cls2,poi_cls3,poi_cls4,poi_cls5 FROM "+hiveTableEnum+" WHERE 1 = 1");
         sb.append(conStr);
         List<TDimMd> list1 = jdbcUtils.executeQueryList(jdbcUrl, "", "", sb.toString(), TDimMd.class, null);
 
-        StringBuilder stringBuilder = new StringBuilder("poi_cls_code"+separator+"poi_cls_name"+separator+"poi_cls1_code"+separator+"poi_cls2_code"+separator+"poi_cls3_code"+separator+"poi_cls4_code"+separator+"poi_cls5_code"+separator+"poi_cls1"+separator+"poi_cls2"+separator+"poi_cls3"+separator+"poi_cls4"+separator+"poi_cls5\r\n");
+        StringBuffer stringBuilder = new StringBuffer("poi_cls_code"+separator+"poi_cls_name"+separator+"poi_cls1_code"+separator+"poi_cls2_code"+separator+"poi_cls3_code"+separator+"poi_cls4_code"+separator+"poi_cls5_code"+separator+"poi_cls1"+separator+"poi_cls2"+separator+"poi_cls3"+separator+"poi_cls4"+separator+"poi_cls5\r\n");
         if (list1!=null){
             list1.forEach(td->{
                 String cls_code = td.getPoi_cls_code() != null ? td.getPoi_cls_code() : "";

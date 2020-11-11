@@ -7,15 +7,14 @@ import com.embraces.hive.config.DataSourceConfig;
 import com.embraces.hive.convert.Decnew;
 import com.embraces.hive.model.HiveTableEnum;
 import com.embraces.hive.service.TvService;
-import com.embraces.hive.util.BaseResult;
-import com.embraces.hive.util.DesEncryptUtil;
-import com.embraces.hive.util.SFTPUtils;
-import com.embraces.hive.util.WriterFileUtil;
+import com.embraces.hive.util.*;
 import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -80,12 +79,11 @@ public abstract class AbstractTvTemplate implements TvService {
      * @return: com.embraces.hive.util.BaseResult<?>
     **/
     @Override
-    public BaseResult<?> deal(JSONArray condition, String methodNameType) {
-        String repCode = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
+    public BaseResult<?> deal(JSONArray condition, String methodNameType, HttpServletResponse response) throws UnsupportedEncodingException {
         HiveTableEnum hiveTableEnum = HiveTableEnum.fromTypeName(methodNameType);
         boolean checkParBol = false;
         log.info("开始校验接口[{}]参数",methodNameType);
-        StringBuilder sb = new StringBuilder();
+        StringBuffer sb = new StringBuffer();
         if ("T_DIM_MD_INDUSTRY_CONT_CODE".equals(hiveTableEnum.name())){
             List<String> parList = new ArrayList<>();
             parList.add("time_id");
@@ -96,15 +94,20 @@ public abstract class AbstractTvTemplate implements TvService {
         log.info("校验接口[{}]结果：{}",methodNameType,checkParBol);
         if (checkParBol){
             if (sb!=null){
-                return deal(repCode,hiveTableEnum,sb.toString(),methodNameType);
+                return deal(hiveTableEnum,sb.toString(),methodNameType,response);
             }
-            return new BaseResult<>(400,"查询条件缺失",repCode);
+            response.addHeader("responseCode","2001");
+            response.addHeader("responseMsg","fail");
+            return new BaseResult<>(500,"查询条件缺失",null) ;
         }
-        return new BaseResult<>(400,"参数缺失",repCode);
+        response.addHeader("responseCode","2001");
+        response.addHeader("responseMsg","fail");
+        return new BaseResult<>(500,"参数缺失",null);
     }
 
 
-    private BaseResult<?> deal(String repCode,HiveTableEnum hiveTableEnum,String conStr,String methodNameType){
+    private BaseResult<?> deal(HiveTableEnum hiveTableEnum,String conStr,String methodNameType, HttpServletResponse response) throws UnsupportedEncodingException {
+        String repCode = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
         SFTPUtils sftpUtils = null;
         String msg = "成功";
         int code = 200;
@@ -131,7 +134,14 @@ public abstract class AbstractTvTemplate implements TvService {
                 sftpUtils.disconnect();
             }
         }
-        return new BaseResult<>(code,msg,repCode);
+        if (code==500){
+            response.addHeader("responseCode","2001");
+            response.addHeader("responseMsg",  "fail");
+        }else{
+            response.addHeader("responseCode","0000");
+            response.addHeader("responseMsg","success");
+        }
+        return new BaseResult<String>(code,msg,code==200?repCode:null);
     }
 
     /**
@@ -144,7 +154,7 @@ public abstract class AbstractTvTemplate implements TvService {
      * @param list
      * @return: boolean
     **/
-    private boolean checkParameter(JSONArray conStrArr,List<String> list,StringBuilder sb){
+    private boolean checkParameter(JSONArray conStrArr,List<String> list,StringBuffer sb){
         List<String> dataSourList = new ArrayList<>();
         dataSourList.add("TIME_ID");
         dataSourList.add("HOME_PROV_ID");
@@ -168,7 +178,8 @@ public abstract class AbstractTvTemplate implements TvService {
                         sb.append(" AND "+key+operator+value);
                     }
                 }else{
-                    sb.append(" AND "+key+">"+value+" AND "+value+">"+key);
+                    String[] val = ((String) value).split(",");
+                    sb.append(" AND "+key+">"+Integer.parseInt(val[0])+" AND "+Integer.parseInt(val[1])+">"+key);
                 }
             }
         });

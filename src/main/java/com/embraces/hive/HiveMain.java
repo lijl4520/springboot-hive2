@@ -3,6 +3,7 @@ package com.embraces.hive;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * @Author Lijl
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.ComponentScan;
  */
 @ComponentScan(basePackages = {"com.embraces.hive"})
 @EnableAutoConfiguration
+@EnableAsync
 public class HiveMain {
 
 	public static void main(String[] args) {
