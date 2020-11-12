@@ -1,21 +1,12 @@
 package com.embraces.hive.controller;
 
 import com.alibaba.fastjson.JSONArray;
-import com.embraces.hive.config.ReqTimeOutConfig;
 import com.embraces.hive.config.TvServiceBaseFactory;
 import com.embraces.hive.util.BaseResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
-import java.util.Random;
-import java.util.concurrent.Executor;
 
 /**
  * @Author Lijl
