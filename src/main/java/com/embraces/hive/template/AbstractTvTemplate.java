@@ -104,12 +104,8 @@ public abstract class AbstractTvTemplate implements TvService {
             if (sb!=null){
                 return deal(hiveTableEnum,sb.toString(),methodNameType,response);
             }
-            response.addHeader("responseCode","2001");
-            response.addHeader("responseMsg","fail");
             return new BaseResult<>(500,"查询条件缺失",null) ;
         }
-        response.addHeader("responseCode","2001");
-        response.addHeader("responseMsg","fail");
         return new BaseResult<>(500,"参数缺失",null);
     }
 
@@ -120,18 +116,18 @@ public abstract class AbstractTvTemplate implements TvService {
         int code = 200;
         asyncServiceExecutor.execute(()->{
             try {
-                //SFTPUtils sftpUtils = null;
                 String restStr = this.executes(conStr,hiveTableEnum,dataSourceConfig.url,"100".equals(dataSourceConfig.separator)?"Ж":dataSourceConfig.separator);
                 String dateStr = getDateStr();
                 String fileName = methodNameType+"_"+dateStr+"_"+repCode+".txt";
-                String filepath = csvFilePath.locaCsvPath+fileName;
+                String path = "";
+                if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
+                    path = csvFilePath.winCsvPath;
+                } else {
+                    path = csvFilePath.locaCsvPath;
+                }
+                String filepath = path+fileName;
                 boolean ret = WriterFileUtil.createCsvFile(restStr, filepath);
-                if (ret){
-                    /*if (csvFilePath.is_sftp){
-                        log.info("上传文件至SFTP服务器");
-                        sftpUtils = new SFTPUtils(csvFilePath.host,csvFilePath.port,csvFilePath.account,csvFilePath.password);
-                        sftpUtils.uploadFile(csvFilePath.remotePath,fileName,csvFilePath.locaCsvPath,fileName);
-                    }*/
+                if (!ret){
                     flagBol = false;
                 }
             }catch (Exception e){
@@ -141,13 +137,6 @@ public abstract class AbstractTvTemplate implements TvService {
             }
         });
         Thread.sleep(reqTimeOutConfig.time_out * 1000);
-        if (!flagBol){
-            response.addHeader("responseCode","2001");
-            response.addHeader("responseMsg",  "fail");
-        }else{
-            response.addHeader("responseCode","0000");
-            response.addHeader("responseMsg","success");
-        }
         return new BaseResult<String>(flagBol==true?code:500,flagBol==true?msg:"失败",flagBol==true?repCode:null);
     }
 

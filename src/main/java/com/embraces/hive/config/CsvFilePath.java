@@ -26,4 +26,6 @@ public class CsvFilePath {
     public int port;
     @Value("${sftp.isSftp}")
     public boolean is_sftp;
+    @Value("${sftp.winLocal.path}")
+    public String winCsvPath;
 }

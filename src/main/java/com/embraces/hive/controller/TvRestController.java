@@ -40,44 +40,13 @@ public class TvRestController {
     **/
     @PostMapping(value = "/{methodNameType}")
     public BaseResult<?> induMethod(@PathVariable String methodNameType, @RequestBody JSONArray jsonArray, HttpServletRequest request,HttpServletResponse response){
-        String requestRefId = request.getHeader("requestRefId");
-        if (requestRefId==null){
-            requestRefId = "";
-        }
-        response.addHeader("requestRefId",requestRefId);
-        response.addHeader("responseRefId","TSRESP_"+getDateStr()+getRandom());
         if (jsonArray!=null){
             try {
                 return TvServiceBaseFactory.handle(methodNameType, jsonArray,response);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }else{
-            response.addHeader("responseCode","2001");
-            response.addHeader("responseMsg","fail");
         }
         return new BaseResult<>(500,"无效参数",null);
-    }
-
-
-    private String getDateStr() {
-        String dataStr = "";
-        LocalDateTime dateTime = LocalDateTime.now();
-        String[] dataTimeArr = dateTime.toString().split("T");
-        String[] data = dataTimeArr[0].split("-");
-        dataStr += data[0]+data[1]+data[2];
-        String[] timeArr = dataTimeArr[1].split(":");
-        dataStr += timeArr[0]+timeArr[1]+timeArr[2].split("\\.")[0];
-        return dataStr;
-    }
-
-
-    private String getRandom(){
-        Random random = new Random();
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < 9; i++) {
-            sb.append(random.nextInt(10));
-        }
-        return sb.toString();
     }
 }
