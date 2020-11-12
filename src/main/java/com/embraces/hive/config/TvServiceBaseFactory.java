@@ -8,7 +8,6 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,7 +72,7 @@ public class TvServiceBaseFactory {
      * @param condition
      * @return: com.embraces.hive.util.BaseResult<?>
     **/
-    public static BaseResult<?> handle(String methodNameType, JSONArray condition, HttpServletResponse response) throws UnsupportedEncodingException {
+    public static BaseResult<?> handle(String methodNameType, JSONArray condition, HttpServletResponse response) throws InterruptedException {
         return getTvService(methodNameType).deal(condition,methodNameType,response);
     }
 

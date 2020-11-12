@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -29,13 +28,6 @@ import java.util.concurrent.Executor;
 @RequestMapping(value = "/indu")
 public class TvRestController {
 
-    private static Logger log = LoggerFactory.getLogger(TvRestController.class);
-    @Autowired
-    private Executor asyncServiceExecutor;
-
-    @Resource
-    private ReqTimeOutConfig reqTimeOutConfig;
-
     /**
      * @Author Lijl
      * @MethodName induMethod
@@ -47,36 +39,24 @@ public class TvRestController {
      * @return: com.embraces.hive.util.BaseResult<?>
     **/
     @PostMapping(value = "/{methodNameType}")
-    public DeferredResult<?> induMethod(@PathVariable String methodNameType, @RequestBody JSONArray jsonArray, HttpServletRequest request,HttpServletResponse response){
-        DeferredResult<BaseResult> result = new DeferredResult<>(reqTimeOutConfig.time_out*1000L);
+    public BaseResult<?> induMethod(@PathVariable String methodNameType, @RequestBody JSONArray jsonArray, HttpServletRequest request,HttpServletResponse response){
         String requestRefId = request.getHeader("requestRefId");
         if (requestRefId==null){
             requestRefId = "";
         }
         response.addHeader("requestRefId",requestRefId);
         response.addHeader("responseRefId","TSRESP_"+getDateStr()+getRandom());
-        result.onTimeout(() -> {
-            response.addHeader("responseCode","5000");
-            response.addHeader("responseMsg", "fail");
-            result.setResult(new BaseResult(503,"请求超时",null));
-        });
-        result.onCompletion(() ->{
-            log.info("API{}调用结束",methodNameType);
-        });
-        asyncServiceExecutor.execute(()->{
-            if (jsonArray!=null){
-                try {
-                    result.setResult(TvServiceBaseFactory.handle(methodNameType, jsonArray,response));
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-            }else{
-                response.addHeader("responseCode","2001");
-                response.addHeader("responseMsg","fail");
-                result.setResult(new BaseResult<>(500,"参数异常",null));
+        if (jsonArray!=null){
+            try {
+                return TvServiceBaseFactory.handle(methodNameType, jsonArray,response);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        });
-        return result;
+        }else{
+            response.addHeader("responseCode","2001");
+            response.addHeader("responseMsg","fail");
+        }
+        return new BaseResult<>(500,"无效参数",null);
     }
 
 

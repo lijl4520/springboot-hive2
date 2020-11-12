@@ -15,5 +15,5 @@ import java.io.UnsupportedEncodingException;
  */
 public interface TvService {
 
-    BaseResult<?> deal(JSONArray condition, String methodNameType, HttpServletResponse response) throws UnsupportedEncodingException;
+    BaseResult<?> deal(JSONArray condition, String methodNameType, HttpServletResponse response) throws InterruptedException;
 }

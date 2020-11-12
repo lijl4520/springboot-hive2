@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.embraces.hive.config.CsvFilePath;
 import com.embraces.hive.config.DataSourceConfig;
+import com.embraces.hive.config.ReqTimeOutConfig;
 import com.embraces.hive.convert.Decnew;
 import com.embraces.hive.model.HiveTableEnum;
 import com.embraces.hive.service.TvService;
@@ -11,14 +12,15 @@ import com.embraces.hive.util.*;
 import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * @Author Lijl
@@ -31,10 +33,16 @@ public abstract class AbstractTvTemplate implements TvService {
 
     private static Logger log = LoggerFactory.getLogger(AbstractTvTemplate.class);
 
+    private volatile boolean flagBol = true;
+
     @Resource
     private CsvFilePath csvFilePath;
     @Resource
     private DataSourceConfig dataSourceConfig;
+    @Autowired
+    private Executor asyncServiceExecutor;
+    @Resource
+    private ReqTimeOutConfig reqTimeOutConfig;
 
     /**
      * @Author Lijl
@@ -79,7 +87,7 @@ public abstract class AbstractTvTemplate implements TvService {
      * @return: com.embraces.hive.util.BaseResult<?>
     **/
     @Override
-    public BaseResult<?> deal(JSONArray condition, String methodNameType, HttpServletResponse response) throws UnsupportedEncodingException {
+    public BaseResult<?> deal(JSONArray condition, String methodNameType, HttpServletResponse response) throws InterruptedException {
         HiveTableEnum hiveTableEnum = HiveTableEnum.fromTypeName(methodNameType);
         boolean checkParBol = false;
         log.info("开始校验接口[{}]参数",methodNameType);
@@ -106,42 +114,41 @@ public abstract class AbstractTvTemplate implements TvService {
     }
 
 
-    private BaseResult<?> deal(HiveTableEnum hiveTableEnum,String conStr,String methodNameType, HttpServletResponse response) throws UnsupportedEncodingException {
+    private BaseResult<?> deal(HiveTableEnum hiveTableEnum,String conStr,String methodNameType, HttpServletResponse response) throws InterruptedException {
         String repCode = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
-        SFTPUtils sftpUtils = null;
         String msg = "成功";
         int code = 200;
-        try {
-            String restStr = this.executes(conStr,hiveTableEnum,dataSourceConfig.url,"100".equals(dataSourceConfig.separator)?"Ж":dataSourceConfig.separator);
-            String dateStr = getDateStr();
-            String fileName = methodNameType+"_"+dateStr+"_"+repCode+".txt";
-            String filepath = csvFilePath.locaCsvPath+fileName;
-            boolean ret = WriterFileUtil.createCsvFile(restStr, filepath);
-            if (ret){
-                if (csvFilePath.is_sftp){
-                    log.info("上传文件至SFTP服务器");
-                    sftpUtils = new SFTPUtils(csvFilePath.host,csvFilePath.port,csvFilePath.account,csvFilePath.password);
-                    sftpUtils.uploadFile(csvFilePath.remotePath,fileName,csvFilePath.locaCsvPath,fileName);
+        asyncServiceExecutor.execute(()->{
+            try {
+                //SFTPUtils sftpUtils = null;
+                String restStr = this.executes(conStr,hiveTableEnum,dataSourceConfig.url,"100".equals(dataSourceConfig.separator)?"Ж":dataSourceConfig.separator);
+                String dateStr = getDateStr();
+                String fileName = methodNameType+"_"+dateStr+"_"+repCode+".txt";
+                String filepath = csvFilePath.locaCsvPath+fileName;
+                boolean ret = WriterFileUtil.createCsvFile(restStr, filepath);
+                if (ret){
+                    /*if (csvFilePath.is_sftp){
+                        log.info("上传文件至SFTP服务器");
+                        sftpUtils = new SFTPUtils(csvFilePath.host,csvFilePath.port,csvFilePath.account,csvFilePath.password);
+                        sftpUtils.uploadFile(csvFilePath.remotePath,fileName,csvFilePath.locaCsvPath,fileName);
+                    }*/
+                    flagBol = false;
                 }
+            }catch (Exception e){
+                e.printStackTrace();
+                log.error("异常:{}",e.getMessage());
+                flagBol = false;
             }
-        }catch (Exception e){
-            e.printStackTrace();
-            log.error("异常:{}",e.getMessage());
-            msg = "失败";
-            code = 500;
-        }finally {
-            if (sftpUtils!=null){
-                sftpUtils.disconnect();
-            }
-        }
-        if (code==500){
+        });
+        Thread.sleep(reqTimeOutConfig.time_out * 1000);
+        if (!flagBol){
             response.addHeader("responseCode","2001");
             response.addHeader("responseMsg",  "fail");
         }else{
             response.addHeader("responseCode","0000");
             response.addHeader("responseMsg","success");
         }
-        return new BaseResult<String>(code,msg,code==200?repCode:null);
+        return new BaseResult<String>(flagBol==true?code:500,flagBol==true?msg:"失败",flagBol==true?repCode:null);
     }
 
     /**
