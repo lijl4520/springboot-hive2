@@ -116,7 +116,9 @@ public enum HiveTableEnum {
     TV_D_SUM_SK_INDU_GENS_DT("api0106"),
     TV_M_SUM_SK_INDU_GENS("api0107"),
     TV_D_SUM_SK_INDU_JOB_DT("api0108"),
-    TV_M_SUM_SK_INDU_JOB("api0109");
+    TV_M_SUM_SK_INDU_JOB("api0109"),
+    TW_DT_EVNT_NL_INDU_ALL_SUM_A("s_0001"),
+    TV_M_EVNT_NL_INDU_ALL_SUM_A("s_0002");
 
     private String typeName;
 

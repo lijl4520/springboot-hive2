@@ -39,16 +39,18 @@ public class TvResponAspect {
             }
         }
         BaseResult ret = (BaseResult) returnVal;
-        String requestRefId = request.getParameter("requestRefId");
-        int code = ret.getCode();
-        response.addHeader("requestRefId",requestRefId==null?"":requestRefId);
-        response.addHeader("responseRefId","TSRESP_"+getDateStr()+getRandom());
-        if (code==200){
-            response.addHeader("responseCode","0000");
-            response.addHeader("responseMsg","success");
-        }else{
-            response.addHeader("responseCode","2001");
-            response.addHeader("responseMsg","fail");
+        if (request!=null && response!=null){
+            String requestRefId = request.getParameter("requestRefId");
+            int code = ret.getCode();
+            response.addHeader("requestRefId",requestRefId==null?"":requestRefId);
+            response.addHeader("responseRefId","TSRESP_"+getDateStr()+getRandom());
+            if (code==200){
+                response.addHeader("responseCode","0000");
+                response.addHeader("responseMsg","success");
+            }else{
+                response.addHeader("responseCode","2001");
+                response.addHeader("responseMsg","fail");
+            }
         }
     }
 

@@ -29,6 +29,20 @@
 			<scope>system</scope>
 			<systemPath>${JAVA_HOME}/lib/tools.jar</systemPath>
 		</dependency>
+
+		<!--<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-client</artifactId>
+			<version>2.1.2</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>-->
+
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jdbc</artifactId>
@@ -477,16 +491,155 @@
 			<scope>system</scope>
 			<systemPath>${project.basedir}/lib/zookeeper-3.5.2-bc3.0.1.jar</systemPath>
 		</dependency>
+		<!-- hbase -->
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-client</artifactId>
+			<version>2.1.2-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hbase-client-2.1.2-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-common</artifactId>
+			<version>2.1.2-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hbase-common-2.1.2-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-hadoop-compat</artifactId>
+			<version>2.1.2-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hbase-hadoop-compat-2.1.2-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-hadoop2-compat</artifactId>
+			<version>2.1.2-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hbase-hadoop2-compat-2.1.2-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-http</artifactId>
+			<version>2.1.2-bc3.0.1-tests</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hbase-http-2.1.2-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-mapreduce</artifactId>
+			<version>2.1.2-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hbase-mapreduce-2.1.2-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-metrics</artifactId>
+			<version>2.1.2-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hbase-metrics-2.1.2-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-metrics-api</artifactId>
+			<version>2.1.2-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hbase-metrics-api-2.1.2-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-procedure</artifactId>
+			<version>2.1.2-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hbase-procedure-2.1.2-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-protocol</artifactId>
+			<version>2.1.2-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hbase-protocol-2.1.2-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-protocol-shaded</artifactId>
+			<version>2.1.2-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hbase-protocol-shaded-2.1.2-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-replication</artifactId>
+			<version>2.1.2-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hbase-replication-2.1.2-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-server</artifactId>
+			<version>2.1.2-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hbase-server-2.1.2-bc3.0.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase.thirdparty</groupId>
+			<artifactId>hbase-shaded-miscellaneous</artifactId>
+			<version>2.1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase.thirdparty</groupId>
+			<artifactId>hbase-shaded-netty</artifactId>
+			<version>2.1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase.thirdparty</groupId>
+			<artifactId>hbase-shaded-protobuf</artifactId>
+			<version>2.1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-zookeeper</artifactId>
+			<version>2.1.2-bc3.0.1</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/hbase-zookeeper-2.1.2-bc3.0.1.jar</systemPath>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-client</artifactId>
 			<version>${hadoop.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.alibaba</groupId>
-			<artifactId>druid-spring-boot-starter</artifactId>
-			<version>1.1.10</version>
 		</dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
@@ -531,7 +684,7 @@
 							</manifest>
 							<manifestEntries>
 								<!--MANIFEST.MF 中 Class-Path 加入资源文件目录 -->
-								<Class-Path>./resources/ lib/hive-accumulo-handler-3.1.0-bc3.0.1.jar lib/hive-beeline-3.1.0-bc3.0.1.jar lib/hive-classification-3.1.0-bc3.0.1.jar lib/hive-cli-3.1.0-bc3.0.1.jar lib/hive-common-3.1.0-bc3.0.1.jar lib/hive-contrib-3.1.0-bc3.0.1.jar lib/hive-druid-handler-3.1.0-bc3.0.1.jar lib/hive-exec-3.1.0-bc3.0.1.jar lib/hive-hbase-handler-3.1.0-bc3.0.1.jar lib/hive-hcatalog-core.jar lib/hive-hcatalog-core-3.1.0-bc3.0.1.jar lib/hive-hcatalog-server-extensions-3.1.0-bc3.0.1.jar lib/hive-hplsql-3.1.0-bc3.0.1.jar lib/hive-jdbc-3.1.0-bc3.0.1.jar lib/hive-jdbc-handler-3.1.0-bc3.0.1.jar lib/hive-kryo-registrator-3.1.0-bc3.0.1.jar lib/hive-llap-client-3.1.0-bc3.0.1.jar lib/hive-llap-common-3.1.0-bc3.0.1.jar lib/hive-llap-common-3.1.0-bc3.0.1-tests.jar lib/hive-llap-ext-client-3.1.0-bc3.0.1.jar lib/hive-llap-server-3.1.0-bc3.0.1.jar lib/hive-llap-tez-3.1.0-bc3.0.1.jar lib/hive-metastore-3.1.0-bc3.0.1.jar lib/hive-serde-3.1.0-bc3.0.1.jar lib/hive-service-3.1.0-bc3.0.1.jar lib/hive-service-rpc-3.1.0-bc3.0.1.jar lib/hive-shims-0.23-3.1.0-bc3.0.1.jar lib/hive-shims-3.1.0-bc3.0.1.jar lib/hive-shims-common-3.1.0-bc3.0.1.jar lib/hive-shims-scheduler-3.1.0-bc3.0.1.jar lib/hive-standalone-metastore-3.1.0-bc3.0.1.jar lib/hive-storage-api-2.7.0.jar lib/hive-streaming-3.1.0-bc3.0.1.jar lib/hive-testutils-3.1.0-bc3.0.1.jar lib/hive-upgrade-acid-3.1.0-bc3.0.1.jar lib/hive-vector-code-gen-3.1.0-bc3.0.1.jar lib/zookeeper-3.5.2-bc3.0.1.jar</Class-Path>
+								<Class-Path>./resources/ lib/hive-accumulo-handler-3.1.0-bc3.0.1.jar lib/hive-beeline-3.1.0-bc3.0.1.jar lib/hive-classification-3.1.0-bc3.0.1.jar lib/hive-cli-3.1.0-bc3.0.1.jar lib/hive-common-3.1.0-bc3.0.1.jar lib/hive-contrib-3.1.0-bc3.0.1.jar lib/hive-druid-handler-3.1.0-bc3.0.1.jar lib/hive-exec-3.1.0-bc3.0.1.jar lib/hive-hbase-handler-3.1.0-bc3.0.1.jar lib/hive-hcatalog-core.jar lib/hive-hcatalog-core-3.1.0-bc3.0.1.jar lib/hive-hcatalog-server-extensions-3.1.0-bc3.0.1.jar lib/hive-hplsql-3.1.0-bc3.0.1.jar lib/hive-jdbc-3.1.0-bc3.0.1.jar lib/hive-jdbc-handler-3.1.0-bc3.0.1.jar lib/hive-kryo-registrator-3.1.0-bc3.0.1.jar lib/hive-llap-client-3.1.0-bc3.0.1.jar lib/hive-llap-common-3.1.0-bc3.0.1.jar lib/hive-llap-common-3.1.0-bc3.0.1-tests.jar lib/hive-llap-ext-client-3.1.0-bc3.0.1.jar lib/hive-llap-server-3.1.0-bc3.0.1.jar lib/hive-llap-tez-3.1.0-bc3.0.1.jar lib/hive-metastore-3.1.0-bc3.0.1.jar lib/hive-serde-3.1.0-bc3.0.1.jar lib/hive-service-3.1.0-bc3.0.1.jar lib/hive-service-rpc-3.1.0-bc3.0.1.jar lib/hive-shims-0.23-3.1.0-bc3.0.1.jar lib/hive-shims-3.1.0-bc3.0.1.jar lib/hive-shims-common-3.1.0-bc3.0.1.jar lib/hive-shims-scheduler-3.1.0-bc3.0.1.jar lib/hive-standalone-metastore-3.1.0-bc3.0.1.jar lib/hive-storage-api-2.7.0.jar lib/hive-streaming-3.1.0-bc3.0.1.jar lib/hive-testutils-3.1.0-bc3.0.1.jar lib/hive-upgrade-acid-3.1.0-bc3.0.1.jar lib/hive-vector-code-gen-3.1.0-bc3.0.1.jar lib/zookeeper-3.5.2-bc3.0.1.jar lib/hbase-client-2.1.2-bc3.0.1.jar lib/hbase-common-2.1.2-bc3.0.1.jar lib/hbase-hadoop2-compat-2.1.2-bc3.0.1.jar lib/hbase-hadoop-compat-2.1.2-bc3.0.1.jar lib/hbase-http-2.1.2-bc3.0.1.jar lib/hbase-mapreduce-2.1.2-bc3.0.1.jar lib/hbase-metrics-2.1.2-bc3.0.1.jar lib/hbase-metrics-api-2.1.2-bc3.0.1.jar lib/hbase-procedure-2.1.2-bc3.0.1.jar lib/hbase-protocol-2.1.2-bc3.0.1.jar lib/hbase-protocol-shaded-2.1.2-bc3.0.1.jar lib/hbase-replication-2.1.2-bc3.0.1.jar lib/hbase-server-2.1.2-bc3.0.1.jar lib/hbase-zookeeper-2.1.2-bc3.0.1.jar</Class-Path>
 							</manifestEntries>
 						</archive>
 						<outputDirectory>${project.build.directory}</outputDirectory>

@@ -39,6 +39,7 @@ public class TvDAppServiceImpl extends AbstractTvTemplate {
         if (list1!=null&&list1.size()>0){
             list1.forEach(td -> {
                 String serv_number = td.getSERV_NUMBER();
+                String imei = td.getIMEI() != null ? td.getIMEI() : "";
                 String sn = "";
                 if (serv_number!=null && !"".equals(serv_number)){
                     try {
@@ -47,8 +48,15 @@ public class TvDAppServiceImpl extends AbstractTvTemplate {
                         e.printStackTrace();
                     }
                 }
-                String imei = td.getIMEI() != null ? td.getIMEI() : "";
-                stringBuilder.append(sn+separator+imei+"\r\n");
+                String im = "";
+                if (imei != null && !"".equals(imei)){
+                    try {
+                        im = bdiDecnew(imei);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                stringBuilder.append(sn+separator+im+"\r\n");
             });
         }
         return stringBuilder.toString();

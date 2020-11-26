@@ -4,9 +4,8 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.ResourceBundle;
 
-import javax.sql.DataSource;
-
-import com.alibaba.druid.pool.DruidDataSource;
+import com.embraces.hive.util.HBaseServiceUtil;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,13 +56,33 @@ public class DataSourceConfig {
 	@Value("${authentication.kerberos.keytab}")
 	private String keytab;
 
+	@Value("${hbase.zookeeper.quorum}")
+	private String zookeeperQuorum;
+	@Value("${hbase.zookeeper.property.clientPort}")
+	private String zookeeperClientPort;
+	@Value("${zookeeper.znode.parent}")
+	private String zookeeperZnodeParent;
+	@Value("${hbase.hbase-site.path}")
+	private String sitePath;
+	@Value("${hbase.authentication.kerberos.keytab}")
+	private String hbasehKeytab;
+	@Value("${hbase.authentication.kerberos.krb5FilePath}")
+	private String hbaseKrb5FilePath;
+	@Value("${hbase.authentication.kerberos.principal}")
+	private String hbasePrincipal;
+
 
 	@Bean
-	public DataSource dataSource() {
+	public HBaseServiceUtil getHbaseServiceUtil() {
 		loadProps();
 		//用户认证
 		authentication();
-		return new DruidDataSource();
+		org.apache.hadoop.conf.Configuration conf = org.apache.hadoop.hbase.HBaseConfiguration.create();
+		conf.set("hbase.zookeeper.quorum", zookeeperQuorum);
+		conf.set("hbase.zookeeper.property.clientPort", zookeeperClientPort);
+		conf.set("zookeeper.znode.parent", zookeeperZnodeParent);
+		conf.addResource(new Path(sitePath));
+		return new HBaseServiceUtil(conf);
 	}
 
 	private void loadProps() {
@@ -74,7 +93,11 @@ public class DataSourceConfig {
 			String key = keys.nextElement();
 			String val = resourceBundle.getString(key);
 			log.info("读取BeanId,API标识:{}对应的业务BeanId:{}",key,val);
-			TvServiceBaseFactory.serviceCode.put(key,val);
+			if (key.contains("_")){
+				HBaseServiceFactory.serviceCode.put(key,val);
+			}else{
+				TvServiceBaseFactory.serviceCode.put(key,val);
+			}
 		}
 		log.info("加载properties配置文件加载完毕");
 	}
@@ -98,8 +121,7 @@ public class DataSourceConfig {
 			log.info("krb5文件路径{}",krb5FilePath);
 		} else {
 			log.info("krb5文件路径{}",krb5FilePath);
-			// linux 会默认到 /etc/krb5.conf
-			System.setProperty("java.security.krb5.conf", krb5FilePath); 
+			System.setProperty("java.security.krb5.conf", krb5FilePath);
 		}
 
 		// 使用Hadoop安全登录
