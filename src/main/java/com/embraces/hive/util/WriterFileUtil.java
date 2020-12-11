@@ -32,7 +32,7 @@ public class WriterFileUtil {
     public static boolean createCsvFile(String jsonString,String filepath){
         boolean flag = true;
         try {
-
+            log.info("--------------------开始写文件------------------------------");
             File file = new File(filepath);
             if(!file.exists()) {
                 file.createNewFile();

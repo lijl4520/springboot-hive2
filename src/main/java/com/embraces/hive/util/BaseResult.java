@@ -1,7 +1,5 @@
 package com.embraces.hive.util;
 
-import com.embraces.hive.model.HiveTableEnum;
-
 /**
  * @Author Lijl
  * @ClassName BaseResult

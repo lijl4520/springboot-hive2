@@ -32,14 +32,12 @@ public class JdbcUtils {
         return conn;
     }
 
-    public List executeQueryList(String url, String userName, String password, String sql, Class cls, List<Object> params)
+    public List executeQueryList(String url, String userName, String password, String sql, Class cls)
             throws Exception {
         log.info("将要的执行SQL：{}",sql);
+        long startTime = System.currentTimeMillis();
         conn = getConn(url,userName, password);
         ps = conn.prepareStatement(sql);
-        if (params!=null){
-            setParams(rs, params);
-        }
         rs = ps.executeQuery();
         List list = new ArrayList();
         while (rs.next()) {
@@ -47,6 +45,8 @@ public class JdbcUtils {
             list.add(data);
         }
         close();
+        long endTime = System.currentTimeMillis();
+        log.info("SQL：{}执行时间：{}毫秒",sql,endTime-startTime);
         return list;
     }
 
@@ -77,21 +77,6 @@ public class JdbcUtils {
             settermethod.invoke(obj, value);
         }
         return obj;
-    }
-
-
-    private void setParams(ResultSet rs, List<Object> params) throws SQLException {
-        for (int i = 0; i < params.size(); i++) {
-            Object v = params.get(i);
-            if(v == null){
-                continue;
-            }
-            if (v instanceof Integer) {
-                ps.setInt(i + 1, (int) v);
-            } else if (v instanceof String) {
-                ps.setString(i + 1, (String) v);
-            }
-        }
     }
 
     public void close() {

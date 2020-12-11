@@ -42,11 +42,6 @@
 			</exclusions>
 		</dependency>-->
 
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-jdbc</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct-jdk8</artifactId>
@@ -660,7 +655,8 @@
 
 	<!-- Package as an executable jar -->
 	<build>
-		<finalName>indu-hive2-api</finalName>
+		<finalName>evnt-hbase-api</finalName>
+		<!--<finalName>indu-hive2-api</finalName>-->
 		<plugins>
 			<!-- 打JAR包 -->
 				<plugin>

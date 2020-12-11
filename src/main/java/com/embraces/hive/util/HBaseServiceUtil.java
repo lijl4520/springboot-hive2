@@ -1,8 +1,6 @@
 package com.embraces.hive.util;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CompareOperator;
@@ -31,6 +29,9 @@ public class HBaseServiceUtil {
      */
     private Admin admin = null;
     private Connection connection = null;
+
+
+    public HBaseServiceUtil(){}
 
     public HBaseServiceUtil(Configuration conf) {
         try {
@@ -216,18 +217,18 @@ public class HBaseServiceUtil {
     public  boolean deleteDataByColumn(String tableName,String rowNumber,String columnFamily,String cloumn){
         try{
             if(!admin.tableExists(TableName.valueOf(tableName))){
-                logger.debug(MessageFormat.format("根据行号表名列簇删除指定列 ->删除最新列,保留旧列失败：表名不存在：{0}",tableName));
+                logger.debug("根据行号表名列簇删除指定列 ->删除最新列,保留旧列失败：表名不存在：{}",tableName);
                 return false;
             }
             Table table = getTable(tableName);
             Delete delete = new Delete(rowNumber.getBytes());
             delete.addColumn(Bytes.toBytes(columnFamily),Bytes.toBytes(cloumn));
             table.delete(delete);
-            logger.info(MessageFormat.format("根据行号表名列簇删除指定列 ->删除最新列,保留旧列成功：表名：{0},行号：{1}，列簇：{2}，列：{3}",tableName,rowNumber,columnFamily,cloumn));
+            logger.info("根据行号表名列簇删除指定列 ->删除最新列,保留旧列成功：表名：{},行号：{}，列簇：{}，列：{}",tableName,rowNumber,columnFamily,cloumn);
             return true;
         }catch (Exception e){
             e.printStackTrace();
-            logger.info(MessageFormat.format("根据行号表名列簇删除指定列 ->删除最新列,保留旧列失败：表名：{0},行号：{1}，列簇：{2}，列：{3}，错误信息：{4}",tableName,rowNumber,columnFamily,cloumn,e.getMessage()));
+            logger.info("根据行号表名列簇删除指定列 ->删除最新列,保留旧列失败：表名：{},行号：{}，列簇：{}，列：{}，错误信息：{}",tableName,rowNumber,columnFamily,cloumn,e.getMessage());
             return false;
         }
     }
@@ -241,7 +242,7 @@ public class HBaseServiceUtil {
     public  boolean deleteDataByAllcolumn(String tableName,String rowNumber,String columnFamily,String cloumn){
         try{
             if(!admin.tableExists(TableName.valueOf(tableName))){
-                logger.debug(MessageFormat.format("根据行号表名列簇删除指定列 ->新旧列都会删除失败：表名不存在：{0}",tableName));
+                logger.debug("根据行号表名列簇删除指定列 ->新旧列都会删除失败：表名不存在：{0}",tableName);
                 return false;
             }
             Table table = getTable(tableName);
@@ -249,11 +250,11 @@ public class HBaseServiceUtil {
             Delete delete = new Delete(rowNumber.getBytes());
             delete.addColumns(Bytes.toBytes(columnFamily),Bytes.toBytes(cloumn));
             table.delete(delete);
-            logger.info(MessageFormat.format("根据行号表名列簇删除指定列 ->新旧列都会删除成功：表名：{0},行号：{1}，列簇：{2}，列：{3}",tableName,rowNumber,columnFamily,cloumn));
+            logger.info("根据行号表名列簇删除指定列 ->新旧列都会删除成功：表名：{},行号：{}，列簇：{}，列：{}",tableName,rowNumber,columnFamily,cloumn);
             return true;
         }catch (Exception e){
             e.printStackTrace();
-            logger.error(MessageFormat.format("根据行号表名列簇删除指定列 ->新旧列都会删除失败：表名：{0},行号：{1}，列簇：{2}，列：{3}，错误信息：{4}",tableName,rowNumber,columnFamily,cloumn,e.getMessage()));
+            logger.error("根据行号表名列簇删除指定列 ->新旧列都会删除失败：表名：{},行号：{}，列簇：{}，列：{}，错误信息：{4}",tableName,rowNumber,columnFamily,cloumn,e.getMessage());
             return false;
         }
     }
@@ -269,11 +270,11 @@ public class HBaseServiceUtil {
                 admin.disableTable(table);
                 admin.deleteTable(table);
             }
-            logger.info(MessageFormat.format("删除表成功:{0}",tableName));
+            logger.info("删除表成功:{}",tableName);
             return true;
         }catch (Exception e){
             e.printStackTrace();
-            logger.debug(MessageFormat.format("删除表失败：{0}，错误信息是：{1}",tableName,e.getMessage()));
+            logger.debug("删除表失败：{}，错误信息是：{}",tableName,e.getMessage());
             return false;
         }finally {
             close(admin,null,null);
@@ -290,7 +291,7 @@ public class HBaseServiceUtil {
             for(TableName tableName : tableNames){
                 resultList.add(tableName.getNameAsString());
             }
-            logger.info(MessageFormat.format("查询库中所有表的表名成功:{0}",JSON.toJSONString(resultList)));
+            logger.info("查询库中所有表的表名成功:{}",JSON.toJSONString(resultList));
         }catch (IOException e) {
             logger.error("获取所有表的表名失败",e);
         }finally {
@@ -318,14 +319,24 @@ public class HBaseServiceUtil {
                     );
                 }
             }
-            logger.info(MessageFormat.format("根据表名和行号查询数据：表名：{0}，行号：{1}，查询结果：{2}",tableName,rowNumber,JSON.toJSONString(resultMap)));
+            logger.info("根据表名和行号查询数据：表名：{}，行号：{}，查询结果：{}",tableName,rowNumber,JSON.toJSONString(resultMap));
         }catch (Exception e){
             e.printStackTrace();
-            logger.debug(MessageFormat.format("根据表名和行号查询数据失败：表名：{0}，行号：{1}，错误信息：{2}",tableName,rowNumber,e.getMessage()));
+            logger.debug("根据表名和行号查询数据失败：表名：{}，行号：{}，错误信息：{}",tableName,rowNumber,e.getMessage());
         }finally {
             close(null,null,table);
         }
         return resultMap;
+    }
+
+
+
+    public List<Map<String,Object>> selectTableDataByRowFilter(String tableName,String rowNumber){
+        Scan scan = new Scan();
+        Table table = getTable(tableName);
+        RowFilter rowFilter = new RowFilter(CompareOperator.EQUAL, new RegexStringComparator(rowNumber+".*"));
+        scan.setFilter(rowFilter);
+        return queryData(table,scan);
     }
 
     /**
@@ -361,7 +372,8 @@ public class HBaseServiceUtil {
         for(Map<String,String> param: queryParam){
             String key = param.get("key");
             String value = param.get("value");
-            SingleColumnValueFilter singleColumnValueFilter = new SingleColumnValueFilter(Bytes.toBytes(columnFamily), Bytes.toBytes(key), CompareOperator.EQUAL,Bytes.toBytes(value));
+            SingleColumnValueFilter singleColumnValueFilter = new SingleColumnValueFilter(Bytes.toBytes(columnFamily),
+                    Bytes.toBytes(key), CompareOperator.EQUAL,Bytes.toBytes(value));
             singleColumnValueFilter.setFilterIfMissing(true);
             filterList.addFilter(singleColumnValueFilter);
         }
@@ -465,11 +477,11 @@ public class HBaseServiceUtil {
             Get get = new Get(Bytes.toBytes(rowNumber));
             get.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column));
             Result result = table.get(get);
-            logger.info(MessageFormat.format("根据表名、行号、列簇、列查询指定列的值：表名：{0}，行号：{1}，列簇：{2}，列名：{3}，查询结果：{4}",tableName,rowNumber,columnFamily,column,Bytes.toString(result.value())));
+            logger.info("根据表名、行号、列簇、列查询指定列的值：表名：{}，行号：{}，列簇：{}，列名：{}，查询结果：{}",tableName,rowNumber,columnFamily,column,Bytes.toString(result.value()));
             return Bytes.toString(result.value());
         } catch (IOException e) {
             e.printStackTrace();
-            logger.info(MessageFormat.format("根据表名、行号、列簇、列查询指定列的值：表名：{0}，行号：{1}，列簇：{2}，列名：{3}，错误信息：{4}",tableName,rowNumber,columnFamily,column,e.getMessage()));
+            logger.info("根据表名、行号、列簇、列查询指定列的值：表名：{}，行号：{}，列簇：{}，列名：{}，错误信息：{}",tableName,rowNumber,columnFamily,column,e.getMessage());
             return "";
         }finally {
             close(null,null,table);
@@ -482,21 +494,26 @@ public class HBaseServiceUtil {
         try {
             resultScanner = table.getScanner(scan);
             for(Result result : resultScanner){
-                logger.info(MessageFormat.format("查询每条HBase数据的行号：{0}",Bytes.toString(result.getRow())));
                 Map<String,Object> resultMap = new HashMap<>();
                 resultMap.put("rowKey",Bytes.toString(result.getRow()));
-                for(Cell cell :result.listCells()){
-                    resultMap.put(Bytes.toString(cell.getQualifierArray(), cell.getQualifierOffset(), cell.getQualifierLength()),
-                            Bytes.toString(cell.getValueArray(), cell.getValueOffset(), cell.getValueLength())
-                    );
-                }
+                List<Cell> cells = result.listCells();
+                if (cells!=null && cells.size()>0){
+                    for (int i = 0; i < cells.size(); i++) {
+                        Cell cell = cells.get(i);
+                        logger.info("列名称：{},值：{}",Bytes.toString(cell.getQualifierArray(), cell.getQualifierOffset(), cell.getQualifierLength()),Bytes.toString(cell.getValueArray(), cell.getValueOffset(), cell.getValueLength()));
+                        resultMap.put(Bytes.toString(cell.getQualifierArray(), cell.getQualifierOffset(), cell.getQualifierLength()),
+                                Bytes.toString(cell.getValueArray(), cell.getValueOffset(), cell.getValueLength())
+                        );
+                    }
                 resultList.add(resultMap);
+                }
             }
-            logger.info(MessageFormat.format("查询指定表中数据信息：表名：{0}，查询结果：{1}",Bytes.toString(table.getName().getName()),JSON.toJSONString(resultList)));
+            logger.info("查询指定表中数据信息：表名：{}，查询结果：{}",Bytes.toString(table.getName().getName()),JSON.toJSONString(resultList));
         } catch (Exception e) {
             e.printStackTrace();
-            logger.debug(MessageFormat.format("查询指定表中数据信息：表名：{0}，错误信息：{1}",Bytes.toString(table.getName().getName()),e.getMessage()));
+            logger.debug("查询指定表中数据信息：表名：{}，错误信息：{}",Bytes.toString(table.getName().getName()),e.getMessage());
         }finally {
+            logger.info("数据抽取完毕,准备关闭数据流");
             close(null,resultScanner,table);
         }
         return resultList;
@@ -534,11 +551,11 @@ public class HBaseServiceUtil {
             for(Result result : resultScanner){
                 rowCount += result.size();
             }
-            logger.info(MessageFormat.format("统计全表数据总数：表名：{0}，查询结果：{1}",Bytes.toString(table.getName().getName()),rowCount));
+            logger.info("统计全表数据总数：表名：{}，查询结果：{}",Bytes.toString(table.getName().getName()),rowCount);
             return rowCount;
         } catch (Exception e) {
             e.printStackTrace();
-            logger.debug(MessageFormat.format("查询指定表中数据信息：表名：{0}，错误信息：{1}",Bytes.toString(table.getName().getName()),e.getMessage()));
+            logger.debug("查询指定表中数据信息：表名：{}，错误信息：{}",Bytes.toString(table.getName().getName()),e.getMessage());
             return rowCount;
         }finally {
             close(null,resultScanner,table);
@@ -548,6 +565,7 @@ public class HBaseServiceUtil {
      * 关闭流
      */
     private void close(Admin admin, ResultScanner rs, Table table){
+        logger.info("关闭流");
         if(admin != null){
             try {
                 admin.close();

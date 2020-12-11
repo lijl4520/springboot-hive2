@@ -2,7 +2,7 @@ package com.embraces.hive.config;
 
 import com.alibaba.fastjson.JSONArray;
 import com.embraces.hive.annotation.ServiceCode;
-import com.embraces.hive.service.TvService;
+import com.embraces.hive.service.hive.TvService;
 import com.embraces.hive.util.BaseResult;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
@@ -69,11 +69,11 @@ public class TvServiceBaseFactory {
      * @Date 11:04 2020/11/2
      * @Version 1.0
      * @param methodNameType
-     * @param condition
+     * @param paramMap
      * @return: com.embraces.hive.util.BaseResult<?>
     **/
-    public static BaseResult<?> handle(String methodNameType, JSONArray condition, HttpServletResponse response) throws InterruptedException {
-        return getTvService(methodNameType).deal(condition,methodNameType,response);
+    public static BaseResult<?> handle(String methodNameType, Map<String,Object> paramMap, HttpServletResponse response) throws InterruptedException {
+        return getTvService(methodNameType).deal(paramMap,methodNameType,response);
     }
 
     /**

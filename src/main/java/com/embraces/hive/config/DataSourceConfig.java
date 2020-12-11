@@ -64,12 +64,8 @@ public class DataSourceConfig {
 	private String zookeeperZnodeParent;
 	@Value("${hbase.hbase-site.path}")
 	private String sitePath;
-	@Value("${hbase.authentication.kerberos.keytab}")
-	private String hbasehKeytab;
-	@Value("${hbase.authentication.kerberos.krb5FilePath}")
-	private String hbaseKrb5FilePath;
-	@Value("${hbase.authentication.kerberos.principal}")
-	private String hbasePrincipal;
+	@Value("${hbase.is_hbase}")
+	private boolean is_hbase;
 
 
 	@Bean
@@ -77,12 +73,16 @@ public class DataSourceConfig {
 		loadProps();
 		//用户认证
 		authentication();
-		org.apache.hadoop.conf.Configuration conf = org.apache.hadoop.hbase.HBaseConfiguration.create();
-		conf.set("hbase.zookeeper.quorum", zookeeperQuorum);
-		conf.set("hbase.zookeeper.property.clientPort", zookeeperClientPort);
-		conf.set("zookeeper.znode.parent", zookeeperZnodeParent);
-		conf.addResource(new Path(sitePath));
-		return new HBaseServiceUtil(conf);
+		if (is_hbase){
+			org.apache.hadoop.conf.Configuration conf = org.apache.hadoop.hbase.HBaseConfiguration.create();
+			conf.set("hbase.zookeeper.quorum", zookeeperQuorum);
+			conf.set("hbase.zookeeper.property.clientPort", zookeeperClientPort);
+			conf.set("zookeeper.znode.parent", zookeeperZnodeParent);
+			conf.addResource(new Path(sitePath));
+			return new HBaseServiceUtil(conf);
+		}else{
+			return new HBaseServiceUtil();
+		}
 	}
 
 	private void loadProps() {
@@ -94,7 +94,7 @@ public class DataSourceConfig {
 			String val = resourceBundle.getString(key);
 			log.info("读取BeanId,API标识:{}对应的业务BeanId:{}",key,val);
 			if (key.contains("_")){
-				HBaseServiceFactory.serviceCode.put(key,val);
+				HbaseEvntServiceFactory.serviceCode.put(key,val);
 			}else{
 				TvServiceBaseFactory.serviceCode.put(key,val);
 			}
