@@ -1,6 +1,7 @@
 package com.embraces.hive.config;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.ResourceBundle;
 
@@ -72,7 +73,7 @@ public class DataSourceConfig {
 	public HBaseServiceUtil getHbaseServiceUtil() {
 		loadProps();
 		//用户认证
-		authentication();
+		//authentication();
 		if (is_hbase){
 			org.apache.hadoop.conf.Configuration conf = org.apache.hadoop.hbase.HBaseConfiguration.create();
 			conf.set("hbase.zookeeper.quorum", zookeeperQuorum);
@@ -84,6 +85,7 @@ public class DataSourceConfig {
 			return new HBaseServiceUtil();
 		}
 	}
+
 
 	private void loadProps() {
 		log.info("开始加载properties配置文件");

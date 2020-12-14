@@ -6,11 +6,8 @@ import com.embraces.hive.config.ReqTimeOutConfig;
 import com.embraces.hive.convert.Decnew;
 import com.embraces.hive.model.enumentity.EventEnum;
 import com.embraces.hive.model.enumentity.EventWhereEnum;
-import com.embraces.hive.model.hive.HiveTableEnum;
 import com.embraces.hive.service.hive.TvService;
-import com.embraces.hive.util.BaseResult;
-import com.embraces.hive.util.DesEncryptUtil;
-import com.embraces.hive.util.WriterFileUtil;
+import com.embraces.hive.util.*;
 import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +34,6 @@ public abstract class AbstractTvTemplate implements TvService {
 
     private static Logger log = LoggerFactory.getLogger(AbstractTvTemplate.class);
 
-    //private static volatile boolean flagBol = true;
-
     @Resource
     private CsvFilePath csvFilePath;
     @Resource
@@ -55,12 +50,12 @@ public abstract class AbstractTvTemplate implements TvService {
      * @Date 11:31 2020/10/28
      * @Version 1.0
      * @param conStr
-     * @param hiveTableEnum
+     * @param tabName
      * @param jdbcUrl
      * @exception throw Exception
      * @return: java.lang.String
     **/
-    protected abstract String executes(String conStr, HiveTableEnum hiveTableEnum, String jdbcUrl, String separator) throws Exception;
+    protected abstract String executes(String conStr, String tabName, String jdbcUrl, String separator) throws Exception;
 
     /**
      * @Author Lijl
@@ -108,14 +103,12 @@ public abstract class AbstractTvTemplate implements TvService {
     **/
     @Override
     public BaseResult<?> deal(Map<String,Object> paramMap, String methodNameType, HttpServletResponse response) throws InterruptedException {
-        HiveTableEnum hiveTableEnum = HiveTableEnum.fromTypeName(methodNameType);
         boolean checkParBol = false;
         log.info("开始校验接口[{}]参数",methodNameType);
         StringBuilder sb = new StringBuilder();
-        if ("T_DIM_MD_INDUSTRY_CONT_CODE".equals(hiveTableEnum.name())){
-            List<String> parList = new ArrayList<>();
-            parList.add("time_id");
-            checkParBol = checkParameter(paramMap,parList, sb);
+        String methodType = "api0007";
+        if (methodType.equals(methodNameType)){
+            checkParBol = checkParameter(paramMap,MandatoryParamUtils.getTvDimParam(), sb);
         }else{
             Object event = paramMap.get("EVENT");
             if (event == null || "0".equals(event)){
@@ -129,7 +122,11 @@ public abstract class AbstractTvTemplate implements TvService {
         log.info("校验接口[{}]结果：{}",methodNameType,checkParBol);
         if (checkParBol){
             if (sb!=null){
-                return deal(hiveTableEnum,sb.toString(),methodNameType,response);
+                String tableName = TableNamePropertiesUtils.getTableName(methodNameType);
+                if (tableName!=null){
+                    return deal(tableName,sb.toString(),methodNameType,response);
+                }
+                return new BaseResult<>(500,"未匹配到要查询的模型",null);
             }
             return new BaseResult<>(500,"查询条件缺失",null) ;
         }
@@ -177,7 +174,7 @@ public abstract class AbstractTvTemplate implements TvService {
                             paraList.add(key);
                             joinWhereSql(sb, key, operator, value);
                         }
-                    }else if ("HOME_PROV_ID".equals(key)){
+                    }else if ("PROV_ID".equals(key)){
                         String operator = (String) map.get("operator");
                         Object value = map.get("value");
                         if (operator!=null && value!=null){
@@ -233,20 +230,20 @@ public abstract class AbstractTvTemplate implements TvService {
      * @Description 执行相关业务
      * @Date 10:41 2020/12/4
      * @Version 1.0
-     * @param hiveTableEnum
+     * @param tabName
      * @param conStr
      * @param methodNameType
      * @param response
      * @return: com.embraces.hive.util.BaseResult<?>
     **/
-    private BaseResult<?> deal(HiveTableEnum hiveTableEnum,String conStr,String methodNameType, HttpServletResponse response) throws InterruptedException {
+    private BaseResult<?> deal(String tabName,String conStr,String methodNameType, HttpServletResponse response) throws InterruptedException {
         AtomicBoolean flagBol = new AtomicBoolean(true);
         String repCode = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
         String msg = "成功";
         int code = 200;
         asyncServiceExecutor.execute(()->{
             try {
-                String restStr = this.executes(conStr,hiveTableEnum,dataSourceConfig.url,"100".equals(dataSourceConfig.separator)?"Ж":dataSourceConfig.separator);
+                String restStr = this.executes(conStr,tabName,dataSourceConfig.url,"100".equals(dataSourceConfig.separator)?"Ж":dataSourceConfig.separator);
                 String dateStr = getDateStr();
                 String fileName = methodNameType+"_"+dateStr+"_"+repCode+".txt";
                 String path = "";
@@ -268,7 +265,7 @@ public abstract class AbstractTvTemplate implements TvService {
             }
         });
         Thread.sleep(reqTimeOutConfig.time_out * 1000);
-        return new BaseResult<String>(flagBol.get() ==true?code:500, flagBol.get() ==true?msg:"失败", flagBol.get() ==true?repCode:null);
+        return new BaseResult<>(flagBol.get() ==true?code:500, flagBol.get() ==true?msg:"失败", flagBol.get() ==true?repCode:null);
     }
 
     /**
@@ -307,14 +304,10 @@ public abstract class AbstractTvTemplate implements TvService {
 
 
     public boolean paraListMandatoryParam(List<String> paraList,List<String> list){
-        List<String> dataSourList = new ArrayList<>();
-        dataSourList.add("TIME_ID");
-        dataSourList.add("HOME_PROV_ID");
-        dataSourList.add("POI_CLS_CODE");
         if (list!=null){
             return paraList.containsAll(list);
         }
-        return paraList.containsAll(dataSourList);
+        return paraList.containsAll(MandatoryParamUtils.getTvEventParam());
     }
 
     /**

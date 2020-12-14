@@ -1,12 +1,18 @@
 package com.embraces.hive.template.hbse;
 
-import com.embraces.hive.model.hbase.HbaseTableEnum;
+import com.embraces.hive.config.DataSourceConfig;
+import com.embraces.hive.convert.Encnew;
 import com.embraces.hive.service.hbase.HBaseService;
 import com.embraces.hive.util.BaseResult;
+import com.embraces.hive.util.DesEncryptUtil;
+import com.embraces.hive.util.MandatoryParamUtils;
+import com.embraces.hive.util.TableNamePropertiesUtils;
 
+import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +26,9 @@ import java.util.Map;
  */
 public abstract class AbstractEvntTemplate implements HBaseService {
 
+    @Resource
+    private DataSourceConfig dataSourceConfig;
+
     /**
      * @Author Lijl
      * @MethodName execute
@@ -27,11 +36,11 @@ public abstract class AbstractEvntTemplate implements HBaseService {
      * @Date 9:20 2020/11/30
      * @Version 1.0
      * @param rowKey
-     * @param hiveTableEnum
+     * @param tabName
      * @param methodNameType
      * @return: com.lijl.hbase.utils.BaseResult<?>
      **/
-    protected abstract BaseResult<?> execute(String rowKey, HbaseTableEnum hiveTableEnum, String methodNameType) throws Exception;
+    protected abstract BaseResult<?> execute(String rowKey, String tabName, String methodNameType) throws Exception;
 
 
     @Override
@@ -40,7 +49,11 @@ public abstract class AbstractEvntTemplate implements HBaseService {
             StringBuilder sb = new StringBuilder();
             if (checkParam(paramMap,sb)){
                 String s = sb.toString();
-                return this.execute(s.substring(0,s.length()-1), HbaseTableEnum.fromTypeName(methodNameType),methodNameType);
+                String tableName = TableNamePropertiesUtils.getTableName(methodNameType);
+                if (tableName!=null){
+                    return this.execute(s.substring(0,s.length()-1), tableName,methodNameType);
+                }
+                return new BaseResult<>(500,"未匹配到要查询的模型",null);
             }
             return new BaseResult<>(500,"参数校验失败",null);
         } catch (Exception e) {
@@ -51,21 +64,25 @@ public abstract class AbstractEvntTemplate implements HBaseService {
 
     private boolean checkParam(Map<String, String> paramMap, StringBuilder sb) {
         int mapSize = 4;
-        List<String> flList = new ArrayList<>();
-        flList.add("SERV_NUMBER");
-        flList.add("HOME_PROV_ID");
-        flList.add("HOME_AREA_ID");
-        flList.add("TIME_ID");
-        if (paramMap!=null && paramMap.size()==mapSize){
+        if (paramMap!=null && paramMap.size()>=mapSize){
             List<String> list = new ArrayList<>();
             paramMap.forEach((key,val)->{
                 if (key!=null && !"".equals(key) && val!=null && !"".equals(val)){
                     list.add(key);
+                    String servNumber = "SERV_NUMBER";
+                    if (servNumber.equals(key)){
+                        try {
+                            sb.append(bdiEcnew(val)+"_");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return;
+                        }
+                    }
                     sb.append(val+"_");
                 }
             });
             if (list.size()==mapSize){
-                return flList.containsAll(list);
+                return list.containsAll(MandatoryParamUtils.getTvEvntParam());
             }else{
                 return false;
             }
@@ -73,6 +90,23 @@ public abstract class AbstractEvntTemplate implements HBaseService {
         return false;
     }
 
+
+    /**
+     * @Author Lijl
+     * @MethodName bdiEcnew
+     * @Description 服务号码加密
+     * @Date 14:34 2020/12/14
+     * @Version 1.0
+     * @param serv_number
+     * @return: java.lang.String
+    **/
+    private String bdiEcnew(String serv_number) throws Exception {
+        if (serv_number!=null && !"".equals(serv_number)){
+            String dateStr = LocalDate.now().toString().replaceAll("-","");
+            return Encnew.encnew(dateStr, serv_number, dataSourceConfig.authSrvUrl, "utf-8");
+        }
+        return "";
+    }
 
     /**
      * @Author Lijl

@@ -1,10 +1,8 @@
 package com.embraces.hive.service.impl.hbase;
 
 import com.embraces.hive.annotation.ServiceCode;
-import com.embraces.hive.model.hbase.HbaseTableEnum;
 import com.embraces.hive.model.hbase.TvMEvntNlInduAll;
 import com.embraces.hive.model.hbase.TvMEvntNlInduAllSum;
-import com.embraces.hive.model.hive.HiveTableEnum;
 import com.embraces.hive.template.hbse.AbstractEvntTemplate;
 import com.embraces.hive.util.BaseResult;
 import com.embraces.hive.util.HBaseServiceUtil;
@@ -28,9 +26,8 @@ public class TvMEvntAllServiceImpl extends AbstractEvntTemplate {
     private HBaseServiceUtil hBaseServiceUtil;
 
     @Override
-    protected BaseResult<?> execute(String rowKey, HbaseTableEnum hiveTableEnum, String methodType) throws Exception {
-        //Map<String, Object> map = hBaseServiceUtil.selectOneRowDataMap("DWA_HW:"+hiveTableEnum, rowKey);
-        List<Map<String,Object>> mapList = hBaseServiceUtil.selectTableDataByRowFilter("DWA_HW:"+hiveTableEnum, rowKey);
+    protected BaseResult<?> execute(String rowKey, String tabName, String methodType) throws Exception {
+        List<Map<String,Object>> mapList = hBaseServiceUtil.selectTableDataByRowFilter("DWA_HW:"+tabName, rowKey);
         List<Object> list = new ArrayList<>();
         if (mapList!=null && mapList.size()>0){
             for (Map<String, Object> map : mapList) {

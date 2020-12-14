@@ -1,7 +1,6 @@
 package com.embraces.hive.service.impl.hive;
 
 import com.embraces.hive.annotation.ServiceCode;
-import com.embraces.hive.model.hive.HiveTableEnum;
 import com.embraces.hive.model.hive.TDimMd;
 import com.embraces.hive.template.hive.AbstractTvTemplate;
 import com.embraces.hive.util.JdbcUtils;
@@ -13,7 +12,7 @@ import java.util.List;
 /**
  * @Author Lijl
  * @ClassName TvDimServiceImpl
- * @Description TODO
+ * @Description 行业维表查询实现
  * @Date 2020/10/27 16:47
  * @Version 1.0
  */
@@ -24,23 +23,23 @@ public class TvDimServiceImpl extends AbstractTvTemplate {
     /**
      * @Author Lijl
      * @MethodName executes
-     * @Description 维表
+     * @Description 查询行业维表
      * @Date 11:34 2020/10/28
      * @Version 1.0
      * @param conStr
-     * @param hiveTableEnum
+     * @param tabName
      * @param jdbcUrl
      * @return: java.lang.String
     **/
     @Override
-    protected String executes(String conStr, HiveTableEnum hiveTableEnum, String jdbcUrl, String separator) throws Exception {
+    protected String executes(String conStr, String tabName, String jdbcUrl, String separator) throws Exception {
         JdbcUtils jdbcUtils = new JdbcUtils();
-        StringBuffer sb = new StringBuffer("SELECT poi_cls_code,poi_cls_name,poi_cls1_code,poi_cls2_code,poi_cls3_code,poi_cls4_code,poi_cls5_code,poi_cls1,poi_cls2,poi_cls3,poi_cls4,poi_cls5 FROM "+hiveTableEnum+" WHERE 1 = 1");
+        StringBuffer sb = new StringBuffer("SELECT poi_cls_code,poi_cls_name,poi_cls1_code,poi_cls2_code,poi_cls3_code,poi_cls4_code,poi_cls5_code,poi_cls1,poi_cls2,poi_cls3,poi_cls4,poi_cls5 FROM "+tabName+" WHERE 1 = 1");
         sb.append(conStr);
         long startTime = System.currentTimeMillis();
         List<TDimMd> list1 = jdbcUtils.executeQueryList(jdbcUrl,"","",sb.toString(), TDimMd.class );
         long endTime = System.currentTimeMillis();
-        log.info("{}查询耗时:{}",hiveTableEnum.getTypeName(),endTime-startTime);
+        log.info("{}查询耗时:{}",tabName,endTime-startTime);
         StringBuffer stringBuilder = new StringBuffer("poi_cls_code"+separator+"poi_cls_name"+separator+"poi_cls1_code"+separator+"poi_cls2_code"+separator+"poi_cls3_code"+separator+"poi_cls4_code"+separator+"poi_cls5_code"+separator+"poi_cls1"+separator+"poi_cls2"+separator+"poi_cls3"+separator+"poi_cls4"+separator+"poi_cls5\r\n");
         if (list1!=null){
             list1.forEach(td->{
