@@ -58,6 +58,9 @@ public class TwDtEvntNlInduAll implements Serializable {
     private Integer KEYWORD_ACTIVE_DAYS;
     private Integer KEYWORD_ONLINE_DUR;
     private Integer KEYWORD_FLUX;
+    private Integer INDU_STAY_NUM;
+    private Double INDU_STAY_DURATION;
+    private Integer INDU_STAY_DAY;
 
     public String getIMEI() {
         return IMEI;
@@ -409,5 +412,29 @@ public class TwDtEvntNlInduAll implements Serializable {
 
     public void setKEYWORD_FLUX(Integer KEYWORD_FLUX) {
         this.KEYWORD_FLUX = KEYWORD_FLUX;
+    }
+
+    public Integer getINDU_STAY_NUM() {
+        return INDU_STAY_NUM;
+    }
+
+    public void setINDU_STAY_NUM(Integer INDU_STAY_NUM) {
+        this.INDU_STAY_NUM = INDU_STAY_NUM;
+    }
+
+    public Double getINDU_STAY_DURATION() {
+        return INDU_STAY_DURATION;
+    }
+
+    public void setINDU_STAY_DURATION(Double INDU_STAY_DURATION) {
+        this.INDU_STAY_DURATION = INDU_STAY_DURATION;
+    }
+
+    public Integer getINDU_STAY_DAY() {
+        return INDU_STAY_DAY;
+    }
+
+    public void setINDU_STAY_DAY(Integer INDU_STAY_DAY) {
+        this.INDU_STAY_DAY = INDU_STAY_DAY;
     }
 }

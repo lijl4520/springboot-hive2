@@ -13,7 +13,8 @@ public enum EventEnum {
     URL("3"),
     APP("4"),
     PUBLIC_VISIT("5"),
-    KEYWORD("6");
+    KEYWORD("6"),
+    INDU("7");
 
     private String event;
 

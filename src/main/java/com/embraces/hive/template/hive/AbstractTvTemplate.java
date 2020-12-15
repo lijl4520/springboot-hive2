@@ -138,7 +138,8 @@ public abstract class AbstractTvTemplate implements TvService {
             List<String> paraList = new ArrayList<>();
             EventEnum eventEnum = EventEnum.fromEvent(et);
             EventWhereEnum eventWhereEnum = EventWhereEnum.fromventWhereEnum(et);
-            if (!eventEnum.name().equals("CALLING")){
+            String eventType = "CALLING";
+            if (!eventEnum.name().equals(eventType)){
                 sb.append(" AND "+eventWhereEnum.name()+" > 0");
             }else{
                 sb.append(" AND (CALLING_NUM > 0 OR CALLED_NUM > 0)");
@@ -255,12 +256,12 @@ public abstract class AbstractTvTemplate implements TvService {
                 String filepath = path+fileName;
                 boolean ret = WriterFileUtil.createCsvFile(restStr, filepath);
                 if (!ret){
-                    log.info("写文件失败");
+                    log.info("接口{}写文件失败",methodNameType);
                     flagBol.set(false);
                 }
             }catch (Exception e){
                 e.printStackTrace();
-                log.error("异常:{}",e.getMessage());
+                log.error("接口{}异常:{}",methodNameType,e.getMessage());
                 flagBol.set(false);
             }
         });

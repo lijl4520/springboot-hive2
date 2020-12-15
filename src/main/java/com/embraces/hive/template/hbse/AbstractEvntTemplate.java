@@ -4,7 +4,6 @@ import com.embraces.hive.config.DataSourceConfig;
 import com.embraces.hive.convert.Encnew;
 import com.embraces.hive.service.hbase.HBaseService;
 import com.embraces.hive.util.BaseResult;
-import com.embraces.hive.util.DesEncryptUtil;
 import com.embraces.hive.util.MandatoryParamUtils;
 import com.embraces.hive.util.TableNamePropertiesUtils;
 

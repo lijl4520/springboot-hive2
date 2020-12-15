@@ -12,7 +12,8 @@ public enum EventWhereEnum {
     URL_VISIT_NUM("3"),
     APP_VISIT_NUM("4"),
     PUBLIC_VISIT_NUM("5"),
-    KEYWORD_VISIT_NUM("6");
+    KEYWORD_VISIT_NUM("6"),
+    INDU_STAY_NUM("7");
 
     private String event;
 
