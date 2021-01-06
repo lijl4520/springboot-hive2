@@ -209,10 +209,10 @@ public class HBaseServiceUtil {
     /**
      * 删除指定的列 ->删除最新列,保留旧列。
      * 如 相同的rowkey的name列数据 提交两次数据，此方法只会删除最近的数据，保留旧数据
-     * @param tableName          表名
-     * @param rowNumber     行号
-     * @param columnFamily  列簇
-     * @param cloumn        列
+     * @param tableName 表名
+     * @param rowNumber 行号
+     * @param columnFamily 列簇
+     * @param cloumn 列
      */
     public  boolean deleteDataByColumn(String tableName,String rowNumber,String columnFamily,String cloumn){
         try{
@@ -334,10 +334,37 @@ public class HBaseServiceUtil {
     public List<Map<String,Object>> selectTableDataByRowFilter(String tableName,String rowNumber){
         Scan scan = new Scan();
         Table table = getTable(tableName);
-        RowFilter rowFilter = new RowFilter(CompareOperator.EQUAL, new RegexStringComparator(rowNumber+".*"));
+        //RowFilter rowFilter = new RowFilter(CompareOperator.EQUAL, new RegexStringComparator(rowNumber+".*"));
+        logger.info("组装Rowkey过滤器，RowKey:{},表名:{}",rowNumber,table.getName());
+        Filter rowFilter = new RowFilter(CompareFilter.CompareOp.EQUAL, new BinaryPrefixComparator(rowNumber.getBytes()));
         scan.setFilter(rowFilter);
+        scan.setCaching(200);
+        scan.setBatch(100);
+        logger.info("开始rowKey查询");
         return queryData(table,scan);
     }
+
+
+
+    public List<Map<String,Object>> getNumRegexRow(String tableName,String rowNumber){
+        String startRowKey = rowNumber + "_";
+        String endRowKey = rowNumber + "a";
+        Table table = getTable(tableName);
+        logger.info("组装Rowkey过滤器，startRowKey:{},endRowKey:{},表名:{}",startRowKey,endRowKey,table.getName());
+        FilterList fl = new FilterList(FilterList.Operator.MUST_PASS_ALL);
+        RegexStringComparator rc = new RegexStringComparator("[^\\\\\\/\\^]");
+        RowFilter rf = new RowFilter(CompareFilter.CompareOp.EQUAL, rc);
+        fl.addFilter(rf);
+        Scan scan = new Scan();
+        //设置取值范围
+        scan.setStartRow(startRowKey.getBytes());//开始的key
+        scan.setStopRow(endRowKey.getBytes());//结束的key
+        scan.setFilter(fl);//为查询设置过滤器的list
+        scan.setCaching(200);
+        scan.setBatch(100);
+        return queryData(table,scan);
+    }
+
 
     /**
      * 根据不同条件查询数据
@@ -495,12 +522,13 @@ public class HBaseServiceUtil {
             resultScanner = table.getScanner(scan);
             for(Result result : resultScanner){
                 Map<String,Object> resultMap = new HashMap<>();
+                //logger.info("查询的行主键，rowKey:{}",Bytes.toString(result.getRow()));
                 resultMap.put("rowKey",Bytes.toString(result.getRow()));
                 List<Cell> cells = result.listCells();
                 if (cells!=null && cells.size()>0){
                     for (int i = 0; i < cells.size(); i++) {
                         Cell cell = cells.get(i);
-                        logger.info("列名称：{},值：{}",Bytes.toString(cell.getQualifierArray(), cell.getQualifierOffset(), cell.getQualifierLength()),Bytes.toString(cell.getValueArray(), cell.getValueOffset(), cell.getValueLength()));
+                        //logger.info("列名称：{},值：{}",Bytes.toString(cell.getQualifierArray(), cell.getQualifierOffset(), cell.getQualifierLength()),Bytes.toString(cell.getValueArray(), cell.getValueOffset(), cell.getValueLength()));
                         resultMap.put(Bytes.toString(cell.getQualifierArray(), cell.getQualifierOffset(), cell.getQualifierLength()),
                                 Bytes.toString(cell.getValueArray(), cell.getValueOffset(), cell.getValueLength())
                         );
@@ -508,12 +536,12 @@ public class HBaseServiceUtil {
                 resultList.add(resultMap);
                 }
             }
-            logger.info("查询指定表中数据信息：表名：{}，查询结果：{}",Bytes.toString(table.getName().getName()),JSON.toJSONString(resultList));
+            //logger.info("查询指定表中数据信息：表名：{}，查询结果：{}",Bytes.toString(table.getName().getName()),JSON.toJSONString(resultList));
         } catch (Exception e) {
             e.printStackTrace();
-            logger.debug("查询指定表中数据信息：表名：{}，错误信息：{}",Bytes.toString(table.getName().getName()),e.getMessage());
+            logger.error("查询指定表中数据信息：表名：{}，错误信息：{}",Bytes.toString(table.getName().getName()),e.getMessage());
         }finally {
-            logger.info("数据抽取完毕,准备关闭数据流");
+            //logger.info("数据抽取完毕,准备关闭数据流");
             close(null,resultScanner,table);
         }
         return resultList;

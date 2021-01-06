@@ -47,15 +47,4 @@ public class EvenRestContoller {
         Map<String, Object> map = hBaseServiceUtil.selectOneRowDataMap(tableName, rowNumber);
         return new BaseResult<>(200,"成功",map);
     }
-
-
-
-    @PostMapping(value = "/test")
-    public BaseResult<?> tests(){
-        TvMEvntNlInduAll tvMEvntNlInduAll = new TvMEvntNlInduAll();
-        tvMEvntNlInduAll.setPOI_CLS1("1111");
-        tvMEvntNlInduAll.setCALLED_DAY(111);
-        tvMEvntNlInduAll.setIMEI("测试");
-        return new BaseResult<>(200,"成功",tvMEvntNlInduAll);
-    }
 }

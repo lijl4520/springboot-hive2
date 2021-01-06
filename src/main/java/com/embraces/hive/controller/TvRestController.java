@@ -1,6 +1,5 @@
 package com.embraces.hive.controller;
 
-import com.alibaba.fastjson.JSONArray;
 import com.embraces.hive.config.TvServiceBaseFactory;
 import com.embraces.hive.util.BaseResult;
 import org.springframework.web.bind.annotation.*;

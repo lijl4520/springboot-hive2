@@ -1,11 +1,13 @@
 package com.embraces.hive.template.hbse;
 
 import com.embraces.hive.config.DataSourceConfig;
-import com.embraces.hive.convert.Encnew;
+import com.embraces.hive.convert.Encrypter;
 import com.embraces.hive.service.hbase.HBaseService;
 import com.embraces.hive.util.BaseResult;
 import com.embraces.hive.util.MandatoryParamUtils;
 import com.embraces.hive.util.TableNamePropertiesUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Field;
@@ -15,6 +17,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @Author Lijl
@@ -24,6 +27,8 @@ import java.util.Map;
  * @Version 1.0
  */
 public abstract class AbstractEvntTemplate implements HBaseService {
+
+    private static Logger log = LoggerFactory.getLogger(AbstractEvntTemplate.class);
 
     @Resource
     private DataSourceConfig dataSourceConfig;
@@ -47,6 +52,7 @@ public abstract class AbstractEvntTemplate implements HBaseService {
         try {
             StringBuilder sb = new StringBuilder();
             if (checkParam(paramMap,sb)){
+                log.info("参数校验通过");
                 String s = sb.toString();
                 String tableName = TableNamePropertiesUtils.getTableName(methodNameType);
                 if (tableName!=null){
@@ -56,31 +62,39 @@ public abstract class AbstractEvntTemplate implements HBaseService {
             }
             return new BaseResult<>(500,"参数校验失败",null);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("查询异常：{}",e.getMessage());
         }
         return new BaseResult<>(500,"查询失败",null);
     }
 
     private boolean checkParam(Map<String, String> paramMap, StringBuilder sb) {
-        int mapSize = 4;
+        log.info("开始操作校验,校验的参数：{}",paramMap.toString());
+        AtomicBoolean flBol = new AtomicBoolean(true);
+        int mapSize = 3;
         if (paramMap!=null && paramMap.size()>=mapSize){
             List<String> list = new ArrayList<>();
-            paramMap.forEach((key,val)->{
-                if (key!=null && !"".equals(key) && val!=null && !"".equals(val)){
-                    list.add(key);
-                    String servNumber = "SERV_NUMBER";
-                    if (servNumber.equals(key)){
-                        try {
-                            sb.append(bdiEcnew(val)+"_");
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            return;
+            MandatoryParamUtils.tvEvntParams.forEach(key -> {
+                try {
+                    String val = paramMap.get(key);
+                    if (val!=null && !"".equals(val)){
+                        String servNumber = "SERV_NUMBER";
+                        if (servNumber.equals(key)){
+                            String s = bdiEcnew(val);
+                            if (s != null && !"".equals(s)){
+                                sb.append(s+"_");
+                            }else{
+                                flBol.set(false);
+                            }
+                        }else{
+                            sb.append(val+"_");
                         }
+                        list.add(key);
                     }
-                    sb.append(val+"_");
+                }catch (Exception e){
+                    log.error("参数校验异常:{}",e.getMessage());
                 }
             });
-            if (list.size()==mapSize){
+            if (list.size()>=mapSize){
                 return list.containsAll(MandatoryParamUtils.getTvEvntParam());
             }else{
                 return false;
@@ -102,7 +116,7 @@ public abstract class AbstractEvntTemplate implements HBaseService {
     private String bdiEcnew(String serv_number) throws Exception {
         if (serv_number!=null && !"".equals(serv_number)){
             String dateStr = LocalDate.now().toString().replaceAll("-","");
-            return Encnew.encnew(dateStr, serv_number, dataSourceConfig.authSrvUrl, "utf-8");
+            return Encrypter.encrypt(dateStr, serv_number, dataSourceConfig.authSrvUrl);
         }
         return "";
     }

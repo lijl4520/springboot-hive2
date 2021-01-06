@@ -21,6 +21,7 @@ public class MandatoryParamUtils {
     public static List<String> tvDimParam = new ArrayList<>();
     public static List<String> tvEventParam = new ArrayList<>();
     public static List<String> tvEvntParam = new ArrayList<>();
+    public static List<String> tvEvntParams = new ArrayList<>();
 
     static {
         log.info("开始加载必选参数properties配置文件");
@@ -37,6 +38,8 @@ public class MandatoryParamUtils {
                     tvEventParam = Arrays.asList(valArr);
                 } else if ("tv_evnt".equals(key)){
                     tvEvntParam = Arrays.asList(valArr);
+                } else if ("tv_evet_param".equals(key)){
+                    tvEvntParams = Arrays.asList(valArr);
                 }
             }
         }

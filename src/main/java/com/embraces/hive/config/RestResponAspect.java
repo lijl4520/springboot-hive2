@@ -23,7 +23,7 @@ import java.util.Random;
 @Aspect
 public class RestResponAspect {
 
-    @Pointcut("execution(* com.embraces.hive.controller.TvRestController.*(..))")
+    @Pointcut("execution(* com.embraces.hive.controller..*(..))")
     public void executePointcut(){}
 
     @AfterReturning(value = "executePointcut()",returning = "returnVal")

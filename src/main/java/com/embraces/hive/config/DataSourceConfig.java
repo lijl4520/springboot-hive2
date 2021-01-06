@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.Scheduled;
 
 /**
  * @Author Lijl
@@ -73,7 +74,7 @@ public class DataSourceConfig {
 	public HBaseServiceUtil getHbaseServiceUtil() {
 		loadProps();
 		//用户认证
-		//authentication();
+		authentication();
 		if (is_hbase){
 			org.apache.hadoop.conf.Configuration conf = org.apache.hadoop.hbase.HBaseConfiguration.create();
 			conf.set("hbase.zookeeper.quorum", zookeeperQuorum);
@@ -127,6 +128,18 @@ public class DataSourceConfig {
 		}
 
 		// 使用Hadoop安全登录
+		loginUserFromKeyTab();
+	}
+
+
+
+	@Scheduled(cron = "0 0 0 * * ?")
+	public void cronJob(){
+		// 使用Hadoop安全登录
+		loginUserFromKeyTab();
+	}
+
+	private void loginUserFromKeyTab() {
 		org.apache.hadoop.conf.Configuration conf = new org.apache.hadoop.conf.Configuration();
 		conf.set("hadoop.security.authentication", authenticationType);
 		try {
