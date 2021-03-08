@@ -6,10 +6,13 @@ import com.embraces.hive.service.hbase.HBaseService;
 import com.embraces.hive.util.BaseResult;
 import com.embraces.hive.util.MandatoryParamUtils;
 import com.embraces.hive.util.TableNamePropertiesUtils;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -44,7 +47,7 @@ public abstract class AbstractEvntTemplate implements HBaseService {
      * @param methodNameType
      * @return: com.lijl.hbase.utils.BaseResult<?>
      **/
-    protected abstract BaseResult<?> execute(String rowKey, String tabName, String methodNameType) throws Exception;
+    protected abstract BaseResult<?> execute(String rowKey, String tabName, String methodNameType,org.apache.hadoop.conf.Configuration conf) throws Exception;
 
 
     @Override
@@ -56,7 +59,8 @@ public abstract class AbstractEvntTemplate implements HBaseService {
                 String s = sb.toString();
                 String tableName = TableNamePropertiesUtils.getTableName(methodNameType);
                 if (tableName!=null){
-                    return this.execute(s.substring(0,s.length()-1), tableName,methodNameType);
+                    org.apache.hadoop.conf.Configuration configuration =  authentication();
+                    return this.execute(s.substring(0,s.length()-1), tableName,methodNameType,configuration);
                 }
                 return new BaseResult<>(500,"未匹配到要查询的模型",null);
             }
@@ -66,6 +70,32 @@ public abstract class AbstractEvntTemplate implements HBaseService {
         }
         return new BaseResult<>(500,"查询失败",null);
     }
+
+
+
+    private org.apache.hadoop.conf.Configuration authentication(){
+        loginUserFromKeyTab();
+        org.apache.hadoop.conf.Configuration conf = org.apache.hadoop.hbase.HBaseConfiguration.create();
+        conf.set("hbase.zookeeper.quorum", dataSourceConfig.zookeeperQuorum);
+        conf.set("hbase.zookeeper.property.clientPort", dataSourceConfig.zookeeperClientPort);
+        conf.set("zookeeper.znode.parent", dataSourceConfig.zookeeperZnodeParent);
+        conf.addResource(new Path(dataSourceConfig.sitePath));
+        return conf;
+    }
+
+    private void loginUserFromKeyTab() {
+        org.apache.hadoop.conf.Configuration conf = new org.apache.hadoop.conf.Configuration();
+        conf.set("hadoop.security.authentication", dataSourceConfig.authenticationType);
+        try {
+            UserGroupInformation.setConfiguration(conf);
+            UserGroupInformation.loginUserFromKeytab(dataSourceConfig.principal, dataSourceConfig.keytab);
+        } catch (IOException e1) {
+            log.error(e1.getMessage() + ", detail:{}", e1);
+        }
+    }
+
+
+
 
     private boolean checkParam(Map<String, String> paramMap, StringBuilder sb) {
         log.info("开始操作校验,校验的参数：{}",paramMap.toString());
