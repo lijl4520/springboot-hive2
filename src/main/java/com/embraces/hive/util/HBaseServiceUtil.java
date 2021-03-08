@@ -594,13 +594,6 @@ public class HBaseServiceUtil {
      */
     private void close(Admin admin, ResultScanner rs, Table table){
         logger.info("关闭流");
-        if(admin != null){
-            try {
-                admin.close();
-            } catch (IOException e) {
-                logger.error("关闭Admin失败",e);
-            }
-        }
         if(rs != null){
             rs.close();
         }
@@ -609,6 +602,20 @@ public class HBaseServiceUtil {
                 table.close();
             } catch (IOException e) {
                 logger.error("关闭Table失败",e);
+            }
+        }
+        if(admin != null){
+            try {
+                admin.close();
+            } catch (IOException e) {
+                logger.error("关闭Admin失败",e);
+            }
+        }
+        if(connection!=null){
+            try {
+                connection.close();
+            } catch (IOException e) {
+                logger.error("关闭Admin失败",e);
             }
         }
     }
