@@ -38,36 +38,36 @@ public class DataSourceConfig {
 	 * 认证类型
 	 */
 	@Value("${authentication.type}")
-	private String authenticationType;
+	public String authenticationType;
 	
 	/**
 	 * 认证服务器配置文件路径
 	 */
 	@Value("${authentication.kerberos.krb5FilePath}")
-	private String krb5FilePath;
+	public String krb5FilePath;
 	
 	/**
 	 * 认证主体
 	 */
 	@Value("${authentication.kerberos.principal}")
-	private String principal;
+	public String principal;
 	
 	/**
 	 * 认证使用的keytab文件
 	 */
 	@Value("${authentication.kerberos.keytab}")
-	private String keytab;
+	public String keytab;
 
 	@Value("${hbase.zookeeper.quorum}")
-	private String zookeeperQuorum;
+	public String zookeeperQuorum;
 	@Value("${hbase.zookeeper.property.clientPort}")
-	private String zookeeperClientPort;
+	public String zookeeperClientPort;
 	@Value("${zookeeper.znode.parent}")
-	private String zookeeperZnodeParent;
+	public String zookeeperZnodeParent;
 	@Value("${hbase.hbase-site.path}")
-	private String sitePath;
+	public String sitePath;
 	@Value("${hbase.is_hbase}")
-	private boolean is_hbase;
+	public boolean is_hbase;
 
 
 	@Bean
@@ -75,16 +75,7 @@ public class DataSourceConfig {
 		loadProps();
 		//用户认证
 		authentication();
-		if (is_hbase){
-			org.apache.hadoop.conf.Configuration conf = org.apache.hadoop.hbase.HBaseConfiguration.create();
-			conf.set("hbase.zookeeper.quorum", zookeeperQuorum);
-			conf.set("hbase.zookeeper.property.clientPort", zookeeperClientPort);
-			conf.set("zookeeper.znode.parent", zookeeperZnodeParent);
-			conf.addResource(new Path(sitePath));
-			return new HBaseServiceUtil(conf);
-		}else{
-			return new HBaseServiceUtil();
-		}
+		return new HBaseServiceUtil();
 	}
 
 
@@ -127,8 +118,10 @@ public class DataSourceConfig {
 			System.setProperty("java.security.krb5.conf", krb5FilePath);
 		}
 
-		// 使用Hadoop安全登录
-		loginUserFromKeyTab();
+		if (!is_hbase){
+			// 使用Hadoop安全登录
+			loginUserFromKeyTab();
+		}
 	}
 
 
@@ -136,7 +129,9 @@ public class DataSourceConfig {
 	@Scheduled(cron = "0 0 0 * * ?")
 	public void cronJob(){
 		// 使用Hadoop安全登录
-		loginUserFromKeyTab();
+		if (!is_hbase){
+			loginUserFromKeyTab();
+		}
 	}
 
 	private void loginUserFromKeyTab() {
