@@ -15,5 +15,5 @@ import java.util.Map;
  */
 public interface TvService {
 
-    BaseResult<?> deal(Map<String,Object> paramMap, String methodNameType, HttpServletResponse response) throws InterruptedException;
+    BaseResult deal(Map<String,Object> paramMap, String methodNameType) throws InterruptedException;
 }

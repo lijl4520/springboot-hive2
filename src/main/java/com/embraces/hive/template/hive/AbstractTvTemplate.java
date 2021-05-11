@@ -14,9 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -68,9 +68,12 @@ public abstract class AbstractTvTemplate implements TvService {
     **/
     protected String bdiDecnew(String serv_number) throws Exception {
         if (serv_number!=null && !"".equals(serv_number)){
-            String dateStr = LocalDate.now().toString().replaceAll("-","");
+            LocalDate now = LocalDate.now();
+            DateTimeFormatter ofPattern = DateTimeFormatter.ofPattern("yyyyMMdd");
+            String dateStr = now.format(ofPattern);
             String decnew = Decnew.decnew(dateStr, serv_number, dataSourceConfig.authSrvUrl, "utf-8");
             if (decnew!=null && !"".equals(decnew)){
+                //DES加密
                 return DesEncryptUtil.encrypt(decnew.getBytes());
             }
         }
@@ -102,7 +105,7 @@ public abstract class AbstractTvTemplate implements TvService {
      * @return: com.embraces.hive.util.BaseResult<?>
     **/
     @Override
-    public BaseResult<?> deal(Map<String,Object> paramMap, String methodNameType, HttpServletResponse response) throws InterruptedException {
+    public BaseResult deal(Map<String,Object> paramMap, String methodNameType) throws InterruptedException {
         boolean checkParBol = false;
         log.info("开始校验接口[{}]参数",methodNameType);
         StringBuilder sb = new StringBuilder();
@@ -124,13 +127,13 @@ public abstract class AbstractTvTemplate implements TvService {
             if (sb!=null){
                 String tableName = TableNamePropertiesUtils.getTableName(methodNameType);
                 if (tableName!=null){
-                    return deal(tableName,sb.toString(),methodNameType,response);
+                    return deal(tableName,sb.toString(),methodNameType);
                 }
-                return new BaseResult<>(500,"未匹配到要查询的模型",null);
+                return BaseResult.error("未匹配到要查询的模型");
             }
-            return new BaseResult<>(500,"查询条件缺失",null) ;
+            return BaseResult.error("查询条件缺失") ;
         }
-        return new BaseResult<>(500,"参数缺失",null);
+        return BaseResult.error("参数缺失");
     }
 
     private boolean dealEventSql(String et, StringBuilder sb, Object obj) {
@@ -234,10 +237,9 @@ public abstract class AbstractTvTemplate implements TvService {
      * @param tabName
      * @param conStr
      * @param methodNameType
-     * @param response
      * @return: com.embraces.hive.util.BaseResult<?>
     **/
-    private BaseResult<?> deal(String tabName,String conStr,String methodNameType, HttpServletResponse response) throws InterruptedException {
+    private BaseResult deal(String tabName,String conStr,String methodNameType) throws InterruptedException {
         AtomicBoolean flagBol = new AtomicBoolean(true);
         String repCode = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
         String msg = "成功";
@@ -266,7 +268,7 @@ public abstract class AbstractTvTemplate implements TvService {
             }
         });
         Thread.sleep(reqTimeOutConfig.time_out * 1000);
-        return new BaseResult<>(flagBol.get() ==true?code:500, flagBol.get() ==true?msg:"失败", flagBol.get() ==true?repCode:null);
+        return new BaseResult(flagBol.get() ==true?code:500, flagBol.get() ==true?msg:"失败", flagBol.get() ==true?repCode:null);
     }
 
     /**

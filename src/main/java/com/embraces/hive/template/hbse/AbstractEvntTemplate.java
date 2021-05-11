@@ -17,6 +17,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,8 @@ public abstract class AbstractEvntTemplate implements HBaseService {
 
     private static Logger log = LoggerFactory.getLogger(AbstractEvntTemplate.class);
 
+    private final int MAP_SIZE = 3;
+
     @Resource
     private DataSourceConfig dataSourceConfig;
 
@@ -47,30 +50,45 @@ public abstract class AbstractEvntTemplate implements HBaseService {
      * @param methodNameType
      * @return: com.lijl.hbase.utils.BaseResult<?>
      **/
-    protected abstract BaseResult<?> execute(String rowKey, String tabName, String methodNameType,org.apache.hadoop.conf.Configuration conf) throws Exception;
+    protected abstract BaseResult execute(String rowKey, String tabName, String methodNameType,org.apache.hadoop.conf.Configuration conf) throws Exception;
 
 
     @Override
-    public BaseResult<?> deal(Map<String,String> paramMap, String methodNameType) {
+    public BaseResult deal(Map<String,String> paramMap, String methodNameType) {
         try {
             StringBuilder sb = new StringBuilder();
-            if (checkParam(paramMap,sb)){
-                log.info("参数校验通过");
+            boolean checkB;
+            if (methodNameType.equals("s_0005")){
+                checkB = checkToMParam(paramMap,sb);
+            }else if (methodNameType.equals("s_0006")){
+                checkB = checkAppYnParam(paramMap,sb);
+            }else if(methodNameType.equals("s_0007")){
+                checkB = checkSearchYnParam(paramMap,sb);
+            }else {
+                checkB = checkParam(paramMap, sb);
+            }
+            /*if (!methodNameType.equals("s_0005")){
+
+            }else if (methodNameType.equals("s_0006")){
+
+            } else{
+
+            }*/
+            if (checkB){
                 String s = sb.toString();
                 String tableName = TableNamePropertiesUtils.getTableName(methodNameType);
                 if (tableName!=null){
                     org.apache.hadoop.conf.Configuration configuration =  authentication();
                     return this.execute(s.substring(0,s.length()-1), tableName,methodNameType,configuration);
                 }
-                return new BaseResult<>(500,"未匹配到要查询的模型",null);
+                return BaseResult.error("未匹配到要查询的模型");
             }
-            return new BaseResult<>(500,"参数校验失败",null);
+            return BaseResult.error("参数校验失败");
         } catch (Exception e) {
             log.error("查询异常：{}",e.getMessage());
         }
-        return new BaseResult<>(500,"查询失败",null);
+        return BaseResult.error("查询失败");
     }
-
 
 
     private org.apache.hadoop.conf.Configuration authentication(){
@@ -90,18 +108,24 @@ public abstract class AbstractEvntTemplate implements HBaseService {
             UserGroupInformation.setConfiguration(conf);
             UserGroupInformation.loginUserFromKeytab(dataSourceConfig.principal, dataSourceConfig.keytab);
         } catch (IOException e1) {
-            log.error(e1.getMessage() + ", detail:{}", e1);
+            log.error("{}, detail:{}",e1.getMessage(), e1);
         }
     }
 
-
-
-
+    /**
+     * @Author lijiale
+     * @MethodName checkParam
+     * @Description 全行业参数校验
+     * @Date 9:24 2021/3/12
+     * @Version 1.0
+     * @param paramMap
+     * @param sb
+     * @return: boolean
+    **/
     private boolean checkParam(Map<String, String> paramMap, StringBuilder sb) {
         log.info("开始操作校验,校验的参数：{}",paramMap.toString());
         AtomicBoolean flBol = new AtomicBoolean(true);
-        int mapSize = 3;
-        if (paramMap!=null && paramMap.size()>=mapSize){
+        if (paramMap!=null && paramMap.size()>=MAP_SIZE){
             List<String> list = new ArrayList<>();
             MandatoryParamUtils.tvEvntParams.forEach(key -> {
                 try {
@@ -111,12 +135,12 @@ public abstract class AbstractEvntTemplate implements HBaseService {
                         if (servNumber.equals(key)){
                             String s = bdiEcnew(val);
                             if (s != null && !"".equals(s)){
-                                sb.append(s+"_");
+                                sb.append(s).append("_");
                             }else{
                                 flBol.set(false);
                             }
                         }else{
-                            sb.append(val+"_");
+                            sb.append(val).append("_");
                         }
                         list.add(key);
                     }
@@ -124,13 +148,144 @@ public abstract class AbstractEvntTemplate implements HBaseService {
                     log.error("参数校验异常:{}",e.getMessage());
                 }
             });
-            if (list.size()>=mapSize){
+            if (!flBol.get()){
+                log.error("参数加密失败，连接不通");
+                return false;
+            }
+            if (list.size()>=MAP_SIZE){
                 return list.containsAll(MandatoryParamUtils.getTvEvntParam());
             }else{
                 return false;
             }
         }
         return false;
+    }
+
+    /**
+     * @Author lijiale
+     * @MethodName checkToMParam
+     * @Description 检查青海同步接口参数
+     * @Date 17:50 2021/3/11
+     * @Version 1.0
+     * @param paramMap
+     * @param sb
+     * @return: boolean
+    **/
+    private boolean checkToMParam(Map<String, String> paramMap, StringBuilder sb) {
+        log.info("开始操作校验,校验的参数：{}",paramMap.toString());
+        StringBuilder stDate = new StringBuilder();
+        StringBuilder enDate = new StringBuilder();
+        AtomicBoolean flBol = new AtomicBoolean(true);
+        try {
+            if (paramMap!=null && paramMap.size()>=MAP_SIZE){
+                List<String> list = new ArrayList<>();
+                List<String> tvEvntParams = MandatoryParamUtils.toMEventParam;
+                for (int i = 0; i < tvEvntParams.size(); i++) {
+                    String key = tvEvntParams.get(i);
+                    String val = paramMap.get(key);
+                    if (val!=null && !"".equals(val)){
+                        String servNumber = "SERV_NUMBER";
+                        if (servNumber.equals(key)){
+                            String s = bdiEcnew(val);
+                            if (s != null && !"".equals(s)){
+                                stDate.append(s).append("_");
+                                enDate.append(s).append("_");
+                            }else{
+                                flBol.set(false);
+                            }
+                        }else{
+                            if (i%2!=0){
+                                stDate.append(val);
+                            }else{
+                                enDate.append(val).append("_");
+                            }
+                        }
+                        list.add(key);
+                    }
+                }
+                if (!flBol.get()){
+                    log.error("参数加密失败，加密访问失败");
+                    return false;
+                }
+                if (list.size()>=MAP_SIZE){
+                    boolean ctB = list.containsAll(MandatoryParamUtils.getToMEventParam());
+                    if (ctB){
+                        sb.append(stDate).append(",").append(enDate);
+                    }
+                    return ctB;
+                }else{
+                    return false;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * @Author lijiale
+     * @MethodName checkAppYnParam
+     * @Description APPtop10参数校验
+     * @Date 14:39 2021/5/7
+     * @Version 1.0
+     * @param paramMap
+     * @param sb
+     * @return: boolean
+    **/
+    private boolean checkAppYnParam(Map<String, String> paramMap, StringBuilder sb) {
+        log.info("APPtop10校验,校验的参数：{}",paramMap.toString());
+        if (paramMap!=null && paramMap.size()>=4){
+            List<String> list = new ArrayList<>();
+            List<String> twAppYnParam = MandatoryParamUtils.getTwAppYnParam();
+            addPValue(paramMap, sb, list, twAppYnParam);
+            if (list.size()>=4){
+                return list.containsAll(twAppYnParam);
+            }else{
+                return false;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @Author lijiale
+     * @MethodName checkSearchYnParam
+     * @Description 关键词搜索参数校验
+     * @Date 15:51 2021/5/7
+     * @Version 1.0
+     * @param paramMap
+     * @param sb
+     * @return: boolean
+    **/
+    private boolean checkSearchYnParam(Map<String, String> paramMap, StringBuilder sb) {
+        log.info("关键词搜索校验,校验的参数：{}",paramMap.toString());
+        if (paramMap!=null && paramMap.size()==2){
+            List<String> list = new ArrayList<>();
+            List<String> twSearchYnParam = MandatoryParamUtils.getTwSearchYnParam();
+            addPValue(paramMap, sb, list, twSearchYnParam);
+            if (list.size()==2){
+                return list.containsAll(twSearchYnParam);
+            }else{
+                return false;
+            }
+        }
+        return false;
+    }
+
+    private void addPValue(Map<String, String> paramMap, StringBuilder sb, List<String> list, List<String> pList) {
+        pList.forEach(key -> {
+            try {
+                String val = paramMap.get(key);
+                if (val!=null && !"".equals(val)){
+                    sb.append(val);
+                    list.add(key);
+                }
+            }catch (Exception e){
+                log.error("参数校验异常:{}",e.getMessage());
+            }
+        });
+        sb.append("_");
     }
 
 
@@ -143,9 +298,11 @@ public abstract class AbstractEvntTemplate implements HBaseService {
      * @param serv_number
      * @return: java.lang.String
     **/
-    private String bdiEcnew(String serv_number) throws Exception {
+    private String bdiEcnew(String serv_number) {
         if (serv_number!=null && !"".equals(serv_number)){
-            String dateStr = LocalDate.now().toString().replaceAll("-","");
+            LocalDate now = LocalDate.now();
+            DateTimeFormatter ofPattern = DateTimeFormatter.ofPattern("yyyyMMdd");
+            String dateStr = now.format(ofPattern);
             return Encrypter.encrypt(dateStr, serv_number, dataSourceConfig.authSrvUrl);
         }
         return "";
@@ -165,7 +322,7 @@ public abstract class AbstractEvntTemplate implements HBaseService {
         Object obj = cls.newInstance();
         Field[] fs = cls.getDeclaredFields();
         for (Field f : fs) {
-            // 属性的名字。
+            //属性的名字。
             String fieldname = f.getName();
             // 属性的类型的class对象。 int -- int.class
             Class<?> type = f.getType();
@@ -173,7 +330,7 @@ public abstract class AbstractEvntTemplate implements HBaseService {
                     + fieldname.substring(1, fieldname.length());
             Method settermethod = cls.getMethod(setter, type);
             if (settermethod == null) {
-                continue;// 如果方法不存在则跳过。
+                continue;//如果方法不存在则跳过。
             }
             Object value = null;
             if (type == int.class || type == Integer.class) {

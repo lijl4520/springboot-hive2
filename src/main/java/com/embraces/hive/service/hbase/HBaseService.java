@@ -12,5 +12,5 @@ import java.util.Map;
  * @Version 1.0
  */
 public interface HBaseService {
-    BaseResult<?> deal(Map<String,String> paramMap, String methodNameType);
+    BaseResult deal(Map<String,String> paramMap, String methodNameType);
 }

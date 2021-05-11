@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
 /**
@@ -55,16 +56,11 @@ public class RestResponAspect {
     }
 
     private String getDateStr() {
-        String dataStr = "";
         LocalDateTime dateTime = LocalDateTime.now();
-        String[] dataTimeArr = dateTime.toString().split("T");
-        String[] data = dataTimeArr[0].split("-");
-        dataStr += data[0]+data[1]+data[2];
-        String[] timeArr = dataTimeArr[1].split(":");
-        dataStr += timeArr[0]+timeArr[1]+timeArr[2].split("\\.")[0];
-        return dataStr;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        String dateStr = dateTime.format(formatter);
+        return dateStr;
     }
-
 
     private String getRandom(){
         Random random = new Random();

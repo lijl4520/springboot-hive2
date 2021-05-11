@@ -29,14 +29,14 @@ public class TvRestController {
      * @return: com.embraces.hive.util.BaseResult<?>
     **/
     @PostMapping(value = "/{methodNameType}")
-    public BaseResult<?> induMethod(@PathVariable String methodNameType, @RequestBody Map<String,Object> paramMap, HttpServletRequest request,HttpServletResponse response){
+    public BaseResult induMethod(@PathVariable String methodNameType, @RequestBody Map<String,Object> paramMap, HttpServletRequest request,HttpServletResponse response){
         if (paramMap!=null){
             try {
-                return TvServiceBaseFactory.handle(methodNameType, paramMap,response);
+                return TvServiceBaseFactory.handle(methodNameType, paramMap);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-        return new BaseResult<>(500,"无效参数",null);
+        return BaseResult.error("无效参数");
     }
 }

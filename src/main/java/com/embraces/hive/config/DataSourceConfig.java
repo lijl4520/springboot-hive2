@@ -86,7 +86,6 @@ public class DataSourceConfig {
 		while (keys.hasMoreElements()) {
 			String key = keys.nextElement();
 			String val = resourceBundle.getString(key);
-			log.info("读取BeanId,API标识:{}对应的业务BeanId:{}",key,val);
 			if (key.contains("_")){
 				HbaseEvntServiceFactory.serviceCode.put(key,val);
 			}else{

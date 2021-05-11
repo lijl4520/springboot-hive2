@@ -45,7 +45,7 @@ public class HbaseEvntServiceFactory {
         return null;
     }
 
-    public static BaseResult<?> handle(String methodNameType, Map<String,String> paramMap) throws InterruptedException {
+    public static BaseResult handle(String methodNameType, Map<String,String> paramMap) throws InterruptedException {
         return getHBaseService(methodNameType).deal(paramMap,methodNameType);
     }
 

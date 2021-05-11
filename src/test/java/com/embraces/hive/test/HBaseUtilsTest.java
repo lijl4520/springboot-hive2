@@ -83,11 +83,6 @@ public class HBaseUtilsTest {
         hBaseServiceUtil.deleteDataByColumn(tableName,rowNumber,columnFamily,column);
     }
 
-    @Test
-    public void getTableDataCount(){
-        String tableName = "david_topic:topictest";
-        hBaseServiceUtil.getTableDataCount(tableName,"log");
-    }
 
     @Test
     public void deleteDataByRowNumber(){

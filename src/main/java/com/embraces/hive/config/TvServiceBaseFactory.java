@@ -73,8 +73,8 @@ public class TvServiceBaseFactory {
      * @param paramMap
      * @return: com.embraces.hive.util.BaseResult<?>
     **/
-    public static BaseResult<?> handle(String methodNameType, Map<String,Object> paramMap, HttpServletResponse response) throws InterruptedException {
-        return getTvService(methodNameType).deal(paramMap,methodNameType,response);
+    public static BaseResult handle(String methodNameType, Map<String,Object> paramMap) throws InterruptedException {
+        return getTvService(methodNameType).deal(paramMap,methodNameType);
     }
 
     /**

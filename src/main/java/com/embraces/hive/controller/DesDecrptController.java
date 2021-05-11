@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 /**
  * @Author Lijl
@@ -37,15 +38,15 @@ public class DesDecrptController {
      * @return: com.embraces.hive.util.BaseResult<?>
     **/
     @PostMapping(value = "/desDecrpt/{str}")
-    public BaseResult<?> desDecrpt(@PathVariable String str){
+    public BaseResult desDecrpt(@PathVariable String str){
         try {
             byte[] decrypt = DesEncryptUtil.decrypt(str);
             String s = new String(decrypt);
-            return new BaseResult<>(200,"解码成功",s);
+            return BaseResult.ok("解码成功",s);
         }catch (Exception e){
             e.printStackTrace();
         }
-        return new BaseResult<>(500,"解码失败",null);
+        return BaseResult.error("解码失败");
     }
 
     /**
@@ -58,14 +59,16 @@ public class DesDecrptController {
      * @return: com.embraces.hive.util.BaseResult<?>
     **/
     @PostMapping(value = "/sm4Decnew/{str}")
-    public BaseResult<?> sm4Decnew(@PathVariable String str){
+    public BaseResult sm4Decnew(@PathVariable String str){
         try {
-            String dateStr = LocalDate.now().toString().replaceAll("-","");
+            LocalDate now = LocalDate.now();
+            DateTimeFormatter ofPattern = DateTimeFormatter.ofPattern("yyyyMMdd");
+            String dateStr = now.format(ofPattern);
             String decnew = Decnew.decnew(dateStr, str, dataSourceConfig.authSrvUrl, "utf-8");
-            return new BaseResult<>(200,"成功",decnew);
+            return BaseResult.ok("成功",decnew);
         }catch (Exception e){
             e.printStackTrace();
         }
-        return new BaseResult<>(500,"解密失败",null);
+        return BaseResult.ok("解密失败");
     }
 }

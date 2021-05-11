@@ -72,7 +72,7 @@ public class HBaseServiceUtil {
             e.printStackTrace();
             return false;
         }finally {
-            close(admin,null,null);
+            close(admin,null,null,connection);
         }
         return true;
     }
@@ -96,7 +96,7 @@ public class HBaseServiceUtil {
             e.printStackTrace();
             return 0;
         }finally {
-            close(admin,null,null);
+            close(admin,null,null,connection);
         }
     }
     /**
@@ -277,7 +277,7 @@ public class HBaseServiceUtil {
             logger.debug("删除表失败：{}，错误信息是：{}",tableName,e.getMessage());
             return false;
         }finally {
-            close(admin,null,null);
+            close(admin,null,null,connection);
         }
     }
 
@@ -295,7 +295,7 @@ public class HBaseServiceUtil {
         }catch (IOException e) {
             logger.error("获取所有表的表名失败",e);
         }finally {
-            close(admin,null,null);
+            close(admin,null,null,connection);
         }
         return resultList;
     }
@@ -324,28 +324,21 @@ public class HBaseServiceUtil {
             e.printStackTrace();
             logger.debug("根据表名和行号查询数据失败：表名：{}，行号：{}，错误信息：{}",tableName,rowNumber,e.getMessage());
         }finally {
-            close(null,null,table);
+            close(admin,null,table,connection);
         }
         return resultMap;
     }
 
-
-
-    public List<Map<String,Object>> selectTableDataByRowFilter(String tableName,String rowNumber){
-        Scan scan = new Scan();
-        Table table = getTable(tableName);
-        //RowFilter rowFilter = new RowFilter(CompareOperator.EQUAL, new RegexStringComparator(rowNumber+".*"));
-        logger.info("组装Rowkey过滤器，RowKey:{},表名:{}",rowNumber,table.getName());
-        Filter rowFilter = new RowFilter(CompareFilter.CompareOp.EQUAL, new BinaryPrefixComparator(rowNumber.getBytes()));
-        scan.setFilter(rowFilter);
-        scan.setCaching(200);
-        scan.setBatch(100);
-        logger.info("开始rowKey查询");
-        return queryData(table,scan);
-    }
-
-
-
+    /**
+     * @Author lijiale
+     * @MethodName getNumRegexRow
+     * @Description 通过rowkey区间查询浙江行业HBase数据
+     * @Date 9:36 2021/3/12
+     * @Version 1.0
+     * @param tableName
+     * @param rowNumber
+     * @return: java.util.List<java.util.Map<java.lang.String,java.lang.Object>>
+    **/
     public List<Map<String,Object>> getNumRegexRow(String tableName,String rowNumber){
         String startRowKey = rowNumber + "_";
         String endRowKey = rowNumber + "a";
@@ -353,17 +346,47 @@ public class HBaseServiceUtil {
         logger.info("组装Rowkey过滤器，startRowKey:{},endRowKey:{},表名:{}",startRowKey,endRowKey,table.getName());
         FilterList fl = new FilterList(FilterList.Operator.MUST_PASS_ALL);
         RegexStringComparator rc = new RegexStringComparator("[^\\\\\\/\\^]");
-        RowFilter rf = new RowFilter(CompareFilter.CompareOp.EQUAL, rc);
+        //RowFilter rf = new RowFilter(CompareFilter.CompareOp.EQUAL, rc);
+        RowFilter rf = new RowFilter(CompareOperator.EQUAL,rc);
         fl.addFilter(rf);
         Scan scan = new Scan();
         //设置取值范围
-        scan.setStartRow(startRowKey.getBytes());//开始的key
-        scan.setStopRow(endRowKey.getBytes());//结束的key
+        //scan.setStartRow(startRowKey.getBytes());//开始的key
+        //scan.setStopRow(endRowKey.getBytes());//结束的key
+        scan.withStartRow(startRowKey.getBytes()).withStopRow(endRowKey.getBytes());
         scan.setFilter(fl);//为查询设置过滤器的list
         scan.setCaching(200);
         scan.setBatch(100);
         return queryData(table,scan);
     }
+
+    /**
+     * @Author lijiale
+     * @MethodName getNumRegexRow
+     * @Description 时间区间查询青海HBase数据
+     * @Date 9:46 2021/3/12
+     * @Version 1.0
+     * @param tableName
+     * @param startRowKey
+     * @param endRowKey
+     * @return: java.util.List<java.util.Map<java.lang.String,java.lang.Object>>
+    **/
+    public List<Map<String,Object>> getNumRegexRow(String tableName,String startRowKey,String endRowKey){
+        Table table = getTable(tableName);
+        logger.info("组装Rowkey过滤器，startRowKey:{},endRowKey:{},表名:{}",startRowKey,endRowKey,table.getName());
+        FilterList fl = new FilterList(FilterList.Operator.MUST_PASS_ALL);
+        RegexStringComparator rc = new RegexStringComparator("[^\\\\\\/\\^]");
+        RowFilter rf = new RowFilter(CompareOperator.EQUAL,rc);
+        fl.addFilter(rf);
+        Scan scan = new Scan();
+        //设置取值范围
+        scan.withStartRow(startRowKey.getBytes()).withStopRow(endRowKey.getBytes());
+        scan.setFilter(fl);//为查询设置过滤器的list
+        scan.setCaching(5000);
+        scan.setBatch(100);
+        return queryData(table,scan);
+    }
+
 
 
     /**
@@ -485,7 +508,7 @@ public class HBaseServiceUtil {
             e.printStackTrace();
             logger.info(MessageFormat.format("根据行号和列簇查询表中数据信息：表名：{0}，行号：{1}，列簇：{2},错误信息：{3}",tableName,rowNumber,columnFamily,e.getMessage()));
         }finally {
-            close(null,resultScanner,table);
+            close(admin,resultScanner,table,connection);
         }
         return resultMap;
     }
@@ -511,7 +534,7 @@ public class HBaseServiceUtil {
             logger.info("根据表名、行号、列簇、列查询指定列的值：表名：{}，行号：{}，列簇：{}，列名：{}，错误信息：{}",tableName,rowNumber,columnFamily,column,e.getMessage());
             return "";
         }finally {
-            close(null,null,table);
+            close(admin,null,table,connection);
         }
     }
 
@@ -522,13 +545,11 @@ public class HBaseServiceUtil {
             resultScanner = table.getScanner(scan);
             for(Result result : resultScanner){
                 Map<String,Object> resultMap = new HashMap<>();
-                //logger.info("查询的行主键，rowKey:{}",Bytes.toString(result.getRow()));
                 resultMap.put("rowKey",Bytes.toString(result.getRow()));
                 List<Cell> cells = result.listCells();
                 if (cells!=null && cells.size()>0){
                     for (int i = 0; i < cells.size(); i++) {
                         Cell cell = cells.get(i);
-                        //logger.info("列名称：{},值：{}",Bytes.toString(cell.getQualifierArray(), cell.getQualifierOffset(), cell.getQualifierLength()),Bytes.toString(cell.getValueArray(), cell.getValueOffset(), cell.getValueLength()));
                         resultMap.put(Bytes.toString(cell.getQualifierArray(), cell.getQualifierOffset(), cell.getQualifierLength()),
                                 Bytes.toString(cell.getValueArray(), cell.getValueOffset(), cell.getValueLength())
                         );
@@ -536,26 +557,13 @@ public class HBaseServiceUtil {
                 resultList.add(resultMap);
                 }
             }
-            //logger.info("查询指定表中数据信息：表名：{}，查询结果：{}",Bytes.toString(table.getName().getName()),JSON.toJSONString(resultList));
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("查询指定表中数据信息：表名：{}，错误信息：{}",Bytes.toString(table.getName().getName()),e.getMessage());
         }finally {
-            //logger.info("数据抽取完毕,准备关闭数据流");
-            close(null,resultScanner,table);
+            close(admin,resultScanner,table,connection);
         }
         return resultList;
-    }
-    /**
-     * 统计表中数据总数
-     * @param tableName     表名
-     * @return
-     */
-    public int getTableDataCount(String tableName){
-        Table table = getTable(tableName);
-        Scan scan = new Scan();
-        return queryDataCount(table,scan);
-
     }
 
     /**
@@ -564,14 +572,25 @@ public class HBaseServiceUtil {
      * @param columnFamily    列簇
      * @return
      */
-    public int getTableDataCount(String tableName,String columnFamily){
+    public int getTableDataCount(String tableName,String columnFamily,String startRowKey,String endRowKey){
         Table table = getTable(tableName);
+        logger.info("组装Rowkey过滤器，startRowKey:{},endRowKey:{},表名:{}",startRowKey,endRowKey,table.getName());
+        FilterList fl = new FilterList(FilterList.Operator.MUST_PASS_ALL);
+        RegexStringComparator rc = new RegexStringComparator("[^\\\\\\/\\^]");
+        RowFilter rf = new RowFilter(CompareOperator.EQUAL,rc);
+        fl.addFilter(rf);
+        fl.addFilter(new FirstKeyOnlyFilter());
         Scan scan = new Scan();
         scan.addFamily(Bytes.toBytes(columnFamily));
+        //设置取值范围
+        scan.withStartRow(startRowKey.getBytes()).withStopRow(endRowKey.getBytes());
+        //为查询设置过滤器的list
+        scan.setFilter(fl);
+        scan.setCaching(5000);
+        scan.setBatch(100);
         return queryDataCount(table,scan);
     }
     private int queryDataCount(Table table,Scan scan){
-        scan.setFilter(new FirstKeyOnlyFilter());
         ResultScanner resultScanner = null;
         int rowCount = 0;
         try {
@@ -579,20 +598,20 @@ public class HBaseServiceUtil {
             for(Result result : resultScanner){
                 rowCount += result.size();
             }
-            logger.info("统计全表数据总数：表名：{}，查询结果：{}",Bytes.toString(table.getName().getName()),rowCount);
+            logger.info("统计数据总数：表名：{}，查询结果：{}",Bytes.toString(table.getName().getName()),rowCount);
             return rowCount;
         } catch (Exception e) {
             e.printStackTrace();
             logger.debug("查询指定表中数据信息：表名：{}，错误信息：{}",Bytes.toString(table.getName().getName()),e.getMessage());
             return rowCount;
         }finally {
-            close(null,resultScanner,table);
+            close(null,resultScanner,table,null);
         }
     }
     /**
      * 关闭流
      */
-    private void close(Admin admin, ResultScanner rs, Table table){
+    private void close(Admin admin, ResultScanner rs, Table table, Connection connection){
         logger.info("关闭流");
         if(rs != null){
             rs.close();

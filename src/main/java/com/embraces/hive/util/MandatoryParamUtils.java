@@ -1,7 +1,5 @@
 package com.embraces.hive.util;
 
-import com.embraces.hive.config.HbaseEvntServiceFactory;
-import com.embraces.hive.config.TvServiceBaseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +20,9 @@ public class MandatoryParamUtils {
     public static List<String> tvEventParam = new ArrayList<>();
     public static List<String> tvEvntParam = new ArrayList<>();
     public static List<String> tvEvntParams = new ArrayList<>();
+    public static List<String> toMEventParam = new ArrayList<>();
+    private static List<String> twAppYn = new ArrayList<>();
+    private static List<String> twSearchYn = new ArrayList<>();
 
     static {
         log.info("开始加载必选参数properties配置文件");
@@ -40,6 +41,12 @@ public class MandatoryParamUtils {
                     tvEvntParam = Arrays.asList(valArr);
                 } else if ("tv_evet_param".equals(key)){
                     tvEvntParams = Arrays.asList(valArr);
+                } else if("to_m_evnt".equals(key)){
+                    toMEventParam = Arrays.asList(valArr);
+                } else if("tw_app_yn".equals(key)){
+                    twAppYn = Arrays.asList(valArr);
+                } else if ("tw_search_yn".equals(key)){
+                    twSearchYn = Arrays.asList(valArr);
                 }
             }
         }
@@ -56,5 +63,17 @@ public class MandatoryParamUtils {
 
     public static List<String> getTvEvntParam(){
         return tvEvntParam;
+    }
+
+    public static List<String> getToMEventParam(){
+        return toMEventParam;
+    }
+
+    public static List<String> getTwAppYnParam(){
+        return twAppYn;
+    }
+
+    public static List<String> getTwSearchYnParam(){
+        return twSearchYn;
     }
 }
